@@ -144,19 +144,19 @@ export default function ServiceRequest() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-8">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-6 sm:mb-8">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 min-h-[44px]">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Request IT Service</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Request IT Service</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base leading-relaxed">
             Fill out the form below and we'll contact you within 24 hours to schedule your service.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Service Selection */}
           <div className="lg:col-span-1">
             <Card>
@@ -196,12 +196,12 @@ export default function ServiceRequest() {
                   {/* Customer Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="customerName">Full Name *</Label>
+                      <Label htmlFor="customerName" className="text-sm sm:text-base">Full Name *</Label>
                       <Input
                         id="customerName"
                         value={formData.customerName}
                         onChange={(e) => handleInputChange('customerName', e.target.value)}
-                        className={errors.customerName ? 'border-destructive' : ''}
+                        className={`min-h-[44px] text-base ${errors.customerName ? 'border-destructive' : ''}`}
                       />
                       {errors.customerName && (
                         <p className="text-sm text-destructive mt-1">{errors.customerName}</p>
@@ -209,13 +209,13 @@ export default function ServiceRequest() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="email" className="text-sm sm:text-base">Email Address *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                        className={errors.email ? 'border-destructive' : ''}
+                        className={`min-h-[44px] text-base ${errors.email ? 'border-destructive' : ''}`}
                       />
                       {errors.email && (
                         <p className="text-sm text-destructive mt-1">{errors.email}</p>
@@ -225,13 +225,13 @@ export default function ServiceRequest() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone" className="text-sm sm:text-base">Phone Number *</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className={errors.phone ? 'border-destructive' : ''}
+                        className={`min-h-[44px] text-base ${errors.phone ? 'border-destructive' : ''}`}
                       />
                       {errors.phone && (
                         <p className="text-sm text-destructive mt-1">{errors.phone}</p>
@@ -239,13 +239,13 @@ export default function ServiceRequest() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="preferredDate">Preferred Date *</Label>
+                      <Label htmlFor="preferredDate" className="text-sm sm:text-base">Preferred Date *</Label>
                       <Input
                         id="preferredDate"
                         type="date"
                         value={formData.preferredDate}
                         onChange={(e) => handleInputChange('preferredDate', e.target.value)}
-                        className={errors.preferredDate ? 'border-destructive' : ''}
+                        className={`min-h-[44px] text-base ${errors.preferredDate ? 'border-destructive' : ''}`}
                         min={new Date().toISOString().split('T')[0]}
                       />
                       {errors.preferredDate && (
@@ -341,11 +341,11 @@ export default function ServiceRequest() {
                     )}
                   </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <Button type="submit" size="lg" className="flex-1">
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Button type="submit" size="lg" className="flex-1 min-h-[48px]">
                       Submit Service Request
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => navigate('/')}>
+                    <Button type="button" variant="outline" onClick={() => navigate('/')} className="min-h-[48px]">
                       Cancel
                     </Button>
                   </div>

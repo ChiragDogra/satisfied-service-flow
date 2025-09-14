@@ -140,10 +140,10 @@ export default function CustomerDashboard() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Service Status Tracker</h1>
-          <p className="text-muted-foreground">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Service Status Tracker</h1>
+          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
             Enter your email address or phone number to view your service requests and track their progress.
           </p>
         </div>
@@ -157,7 +157,7 @@ export default function CustomerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSearch} className="flex gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <Label htmlFor="search" className="sr-only">
                   Email or Phone Number
@@ -168,10 +168,10 @@ export default function CustomerDashboard() {
                   placeholder="Enter your email address or phone number"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
+                  className="w-full min-h-[44px] text-base"
                 />
               </div>
-              <Button type="submit" size="lg">
+              <Button type="submit" size="lg" className="min-h-[44px] w-full sm:w-auto">
                 <Search className="h-4 w-4 mr-2" />
                 Search
               </Button>
