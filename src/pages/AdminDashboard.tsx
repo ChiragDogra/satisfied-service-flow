@@ -153,77 +153,77 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 sm:mb-4">Admin Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             Manage service requests, update statuses, and monitor business performance.
           </p>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Requests</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Requests</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
                 </div>
-                <Users className="h-8 w-8 text-primary" />
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-warning">{stats.pending}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Pending</p>
+                  <p className="text-xl sm:text-2xl font-bold text-warning">{stats.pending}</p>
                 </div>
-                <Clock className="h-8 w-8 text-warning" />
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold text-success">{stats.completed}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-xl sm:text-2xl font-bold text-success">{stats.completed}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-success" />
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-success" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
-                  <p className="text-2xl font-bold text-primary">{stats.completionRate}%</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Success Rate</p>
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{stats.completionRate}%</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-primary" />
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters and Actions */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-              <div className="flex gap-4 flex-wrap">
+        <Card className="mb-4 sm:mb-6">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Filters:</span>
                 </div>
                 
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-full sm:w-[140px] min-h-[44px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                 </Select>
 
                 <Select value={filterService} onValueChange={setFilterService}>
-                  <SelectTrigger className="w-[160px]">
+                  <SelectTrigger className="w-full sm:w-[160px] min-h-[44px]">
                     <SelectValue placeholder="Service Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="min-h-[44px] flex-1 sm:flex-none">
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </Button>
@@ -261,15 +261,15 @@ export default function AdminDashboard() {
 
         {/* Service Requests Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Service Requests ({filteredRequests.length})</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Service Requests ({filteredRequests.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-4 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
               {filteredRequests.length > 0 ? (
                 filteredRequests.map((request) => (
-                  <div key={request.id} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                  <div key={request.id} className="border rounded-lg p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 items-start">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-semibold">#{request.id}</span>
@@ -309,12 +309,12 @@ export default function AdminDashboard() {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 sm:gap-3">
                         <Select
                           value={request.status}
                           onValueChange={(newStatus) => handleStatusUpdate(request.id, newStatus as ServiceRequest['status'])}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full min-h-[44px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -330,6 +330,7 @@ export default function AdminDashboard() {
                               variant="outline"
                               size="sm"
                               onClick={() => setSelectedRequest(request)}
+                              className="min-h-[44px] text-sm"
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
