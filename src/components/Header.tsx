@@ -23,8 +23,7 @@ export default function Header() {
         <div className="flex flex-1">
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
             <img className="h-8 w-auto" src={logo} alt="Satisfied Computers" />
-            <span className="font-bold text-lg text-foreground hidden sm:block">Satisfied Computers</span>
-            <span className="font-bold text-base text-foreground sm:hidden">SC</span>
+            <span className="font-bold text-base sm:text-lg text-foreground">Satisfied Computers</span>
           </Link>
         </div>
 
@@ -57,13 +56,9 @@ export default function Header() {
                 variant="ghost"
                 size="icon"
                 className="p-2"
-                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-label="Open menu"
               >
-                {isMenuOpen ? (
-                  <X className="h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="h-6 w-6" aria-hidden="true" />
-                )}
+                <Menu className="h-6 w-6" aria-hidden="true" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-sm p-0">
