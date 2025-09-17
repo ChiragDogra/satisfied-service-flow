@@ -18,11 +18,12 @@ export default function Header() {
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-3 sm:p-4 lg:px-8" aria-label="Global">
-        <div className="flex lg:flex-1">
-          <Link to="/" className="-m-1.5 p-1.5 flex items-center space-x-2 sm:space-x-3">
-            <img className="h-8 w-auto sm:h-10" src={logo} alt="Satisfied Computers" />
-            <span className="font-bold text-base sm:text-lg lg:text-xl text-foreground">Satisfied Computers</span>
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8" aria-label="Global">
+        <div className="flex flex-1">
+          <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
+            <img className="h-8 w-auto" src={logo} alt="Satisfied Computers" />
+            <span className="font-bold text-lg text-foreground hidden xs:block">Satisfied Computers</span>
+            <span className="font-bold text-base text-foreground block xs:hidden">SC</span>
           </Link>
         </div>
         
@@ -31,9 +32,9 @@ export default function Header() {
             variant="ghost"
             size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
+            className="relative z-50 p-2"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
-            <span className="sr-only">Open main menu</span>
             {isMenuOpen ? (
               <X className="h-6 w-6" aria-hidden="true" />
             ) : (
@@ -47,8 +48,8 @@ export default function Header() {
             <Link
               key={item.name}
               to={item.href}
-              className={`text-sm font-semibold leading-6 transition-colors hover:text-primary min-h-[44px] flex items-center ${
-                isActive(item.href) ? 'text-primary' : 'text-muted-foreground'
+              className={`text-sm font-semibold leading-6 transition-colors hover:text-primary min-h-[44px] flex items-center px-3 py-2 rounded-md ${
+                isActive(item.href) ? 'text-primary bg-primary/10' : 'text-muted-foreground'
               }`}
             >
               {item.name}
@@ -63,34 +64,46 @@ export default function Header() {
         </div>
       </nav>
       
-      {/* Mobile menu */}
+      {/* Mobile menu overlay */}
       {isMenuOpen && (
-        <div className="lg:hidden">
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-4 py-4 sm:px-6 sm:py-6 sm:max-w-sm sm:ring-1 sm:ring-border/10">
-            <div className="flex items-center justify-between mb-6">
-              <Link to="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                <img className="h-6 w-auto sm:h-8" src={logo} alt="Satisfied Computers" />
-                <span className="font-bold text-sm sm:text-lg text-foreground">Satisfied Computers</span>
-              </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMenuOpen(false)}
-                className="-m-2.5 rounded-md p-2.5"
-              >
-                <span className="sr-only">Close menu</span>
-                <X className="h-6 w-6" aria-hidden="true" />
-              </Button>
-            </div>
-            <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-border/10">
-                <div className="space-y-1 py-4">
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Mobile menu panel */}
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-background shadow-xl lg:hidden">
+            <div className="flex h-full flex-col overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-6 border-b border-border/20">
+                <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
+                  <img className="h-8 w-auto" src={logo} alt="Satisfied Computers" />
+                  <span className="font-bold text-lg text-foreground">Satisfied Computers</span>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2"
+                  aria-label="Close menu"
+                >
+                  <X className="h-6 w-6" aria-hidden="true" />
+                </Button>
+              </div>
+              
+              {/* Navigation links */}
+              <div className="flex-1 px-4 py-6">
+                <div className="space-y-2">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`-mx-3 block rounded-lg px-4 py-3 text-base font-semibold leading-7 transition-colors hover:bg-muted min-h-[48px] flex items-center ${
-                        isActive(item.href) ? 'text-primary bg-muted' : 'text-foreground'
+                      className={`block rounded-lg px-4 py-3 text-base font-semibold transition-colors min-h-[48px] flex items-center ${
+                        isActive(item.href) 
+                          ? 'text-primary bg-primary/10' 
+                          : 'text-foreground hover:bg-muted'
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -98,7 +111,9 @@ export default function Header() {
                     </Link>
                   ))}
                 </div>
-                <div className="py-4">
+                
+                {/* Admin button */}
+                <div className="mt-6 pt-6 border-t border-border/20">
                   <Button asChild variant="professional" className="w-full min-h-[48px] text-base">
                     <Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Access</Link>
                   </Button>
@@ -106,7 +121,7 @@ export default function Header() {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
