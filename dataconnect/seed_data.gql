@@ -1,0 +1,22 @@
+mutation PopulateDatabase @auth(level: NO_ACCESS) {
+  service_upsertMany(data: [
+    {
+      name: "Oil Change",
+      description: "Standard oil and filter replacement",
+      price: 39.99,
+      estimatedDuration: 30
+    },
+    {
+      name: "Tire Rotation",
+      description: "Rotate tires to ensure even wear",
+      price: 25.00,
+      estimatedDuration: 20
+    },
+    {
+      name: "Brake Inspection",
+      description: "Inspect brake pads, rotors, and calipers",
+      price: 49.99,
+      estimatedDuration: 45
+    }
+  ])
+}

@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import logo from '@/assets/logo.png';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -42,10 +44,33 @@ export default function Header() {
           ))}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Button asChild variant="professional" size="sm" className="min-h-[44px]">
-            <Link to="/admin">Admin Access</Link>
-          </Button>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-3">
+          {user ? (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {isAdmin ? 'Admin' : 'Customer'}
+              </span>
+              <Button asChild variant="outline" size="sm" className="min-h-[44px]">
+                <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'}>
+                  <User className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={signOut} className="min-h-[44px]">
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="min-h-[44px]">
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button asChild variant="professional" size="sm" className="min-h-[44px]">
+                <Link to="/register">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger & sheet */}
@@ -83,7 +108,7 @@ export default function Header() {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`block rounded-lg px-4 py-3 text-base font-semibold transition-colors min-h-[48px] flex items-center ${
+                      className={`flex rounded-lg px-4 py-3 text-base font-semibold transition-colors min-h-[48px] items-center ${
                         isActive(item.href)
                           ? 'text-primary bg-primary/10'
                           : 'text-foreground hover:bg-muted'
@@ -94,10 +119,30 @@ export default function Header() {
                     </Link>
                   ))}
                 </div>
-                <div className="mt-6 pt-6 border-t border-border/20">
-                  <Button asChild variant="professional" className="w-full min-h-[48px] text-base">
-                    <Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Access</Link>
-                  </Button>
+                <div className="mt-6 pt-6 border-t border-border/20 space-y-3">
+                  {user ? (
+                    <>
+                      <Button asChild variant="outline" className="w-full min-h-[48px] text-base">
+                        <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'} onClick={() => setIsMenuOpen(false)}>
+                          <User className="w-4 h-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" onClick={() => { signOut(); setIsMenuOpen(false); }} className="w-full min-h-[48px] text-base">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button asChild variant="ghost" className="w-full min-h-[48px] text-base">
+                        <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
+                      </Button>
+                      <Button asChild variant="professional" className="w-full min-h-[48px] text-base">
+                        <Link to="/register" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

@@ -1,0 +1,49 @@
+type User @table {
+  uid: String!
+  displayName: String!
+  email: String!
+  role: String!
+  createdAt: Timestamp!
+  phoneNumber: String
+  address: String
+  photoURL: String
+}
+
+type Service @table {
+  name: String!
+  price: Float!
+  createdAt: Timestamp!
+  description: String
+  estimatedDuration: Int
+}
+
+type ServiceOrder @table {
+  customer: User!
+  title: String!
+  description: String!
+  status: String!
+  createdAt: Timestamp!
+  lastUpdated: Timestamp!
+  assignedTechnician: User
+  priority: String
+  estimatedCompletionDate: Date
+  notes: String
+  customerNotes: String
+}
+
+type ServiceOrderItem @table {
+  serviceOrder: ServiceOrder!
+  service: Service!
+  quantity: Int!
+  priceAtTimeOfOrder: Float!
+  notes: String
+}
+
+type Update @table {
+  serviceOrder: ServiceOrder!
+  user: User!
+  type: String!
+  timestamp: Timestamp!
+  content: String!
+  newStatus: String
+}

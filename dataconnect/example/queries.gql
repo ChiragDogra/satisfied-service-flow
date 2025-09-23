@@ -1,0 +1,64 @@
+mutation CreateServiceOrder($data: ServiceOrder_Data!) @auth(level: USER) {
+  serviceOrder_insert(data: $data)
+}
+
+query ListAvailableServices @auth(level: PUBLIC) {
+  services {
+    id
+    name
+    description
+    price
+    estimatedDuration
+  }
+}
+
+query GetServiceOrder($id: UUID!) @auth(level: USER) {
+  serviceOrder(id: $id) {
+    id
+    title
+    description
+    status
+    priority
+    customerNotes
+    notes
+    estimatedCompletionDate
+    customer {
+      id
+      displayName
+      email
+      phoneNumber
+    }
+    assignedTechnician {
+      id
+      displayName
+      email
+      phoneNumber
+    }
+    serviceOrderItems_on_serviceOrder {
+      id
+      service {
+        id
+        name
+        description
+        price
+      }
+      quantity
+      priceAtTimeOfOrder
+      notes
+    }
+    updates_on_serviceOrder {
+      id
+      content
+      newStatus
+      timestamp
+      user {
+        id
+        displayName
+      }
+    }
+  }
+}
+
+mutation UpdateServiceOrderStatus($id: UUID!, $data: ServiceOrder_Data!) @auth(level: USER) {
+  serviceOrder_update(id: $id, data: $data)
+}

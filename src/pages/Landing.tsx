@@ -78,10 +78,10 @@ export default function Landing() {
             </p>
             <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-0">
               <Button asChild size="xl" variant="secondary" className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold">
-                <Link to="/request">Request Service Now</Link>
+                <Link to="/register">Get Started</Link>
               </Button>
               <Button asChild variant="outline" size="xl" className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto min-h-[48px] text-base font-semibold">
-                <Link to="/status">Check Service Status</Link>
+                <Link to="/login">Sign In</Link>
               </Button>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function Landing() {
           
           <div className="mt-6 sm:mt-8 lg:mt-12 text-center">
             <Button asChild size="lg" variant="hero" className="shadow-xl min-h-[48px] w-full sm:w-auto text-base font-semibold max-w-xs">
-              <Link to="/request">Get Started Today</Link>
+              <Link to="/register">Get Started Today</Link>
             </Button>
           </div>
         </div>
