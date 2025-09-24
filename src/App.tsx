@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ServiceProvider } from "./contexts/ServiceContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FirebaseSetup from "./components/FirebaseSetup";
 import Login from "./pages/Login";
@@ -12,6 +13,8 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
+import ServiceRequest from "./pages/ServiceRequest";
+import Status from "./pages/Status";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <ServiceProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -44,6 +48,8 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/request" element={<ServiceRequest />} />
+              <Route path="/status" element={<Status />} />
               
               {/* Protected customer routes */}
               <Route 
@@ -74,6 +80,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </ServiceProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

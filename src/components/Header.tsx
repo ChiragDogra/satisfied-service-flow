@@ -48,7 +48,7 @@ export default function Header() {
           {user ? (
             <>
               <span className="text-sm text-muted-foreground">
-                {isAdmin ? 'Admin' : 'Customer'}
+                {isAdmin ? 'Admin' : (user.displayName || user.email || 'Customer')}
               </span>
               <Button asChild variant="outline" size="sm" className="min-h-[44px]">
                 <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'}>
@@ -122,6 +122,9 @@ export default function Header() {
                 <div className="mt-6 pt-6 border-t border-border/20 space-y-3">
                   {user ? (
                     <>
+                      <div className="px-1 text-sm text-muted-foreground">
+                        {isAdmin ? 'Admin' : (user.displayName || user.email || 'Customer')}
+                      </div>
                       <Button asChild variant="outline" className="w-full min-h-[48px] text-base">
                         <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'} onClick={() => setIsMenuOpen(false)}>
                           <User className="w-4 h-4 mr-2" />

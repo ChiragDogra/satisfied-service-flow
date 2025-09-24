@@ -5,6 +5,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   FacebookAuthProvider,
   GithubAuthProvider,
@@ -95,6 +97,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
   }, [auth]);
+
+  // Handle redirect result for providers (useful on hosting/iOS/Safari)
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          // If new user, create profile
+          if (result.additionalUserInfo?.isNewUser) {
+            const u = result.user;
+            await setDoc(doc(db, 'users', u.uid), {
+              uid: u.uid,
+              name: u.displayName || 'Unknown',
+              email: u.email || '',
+              phone: u.phoneNumber || '',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+          }
+          toast.success('Signed in successfully!');
+        }
+      } catch (e) {
+        // Ignore if no redirect pending; show friendly error otherwise
+      }
+    })();
+  }, []);
 
   // Listen for authentication state changes
   useEffect(() => {
@@ -187,7 +215,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      // Prefer popup; fallback to redirect if blocked or in restricted browsers
+      let result;
+      try {
+        result = await signInWithPopup(auth, provider);
+      } catch (popupError: any) {
+        const shouldFallback =
+          popupError?.code === 'auth/popup-blocked' ||
+          popupError?.code === 'auth/popup-closed-by-user' ||
+          popupError?.code === 'auth/operation-not-supported-in-this-environment';
+        if (shouldFallback) {
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw popupError;
+      }
       
       // Check if this is a new user and create profile
       if (result.additionalUserInfo?.isNewUser) {

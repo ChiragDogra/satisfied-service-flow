@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Monitor,
   Printer,
@@ -59,6 +60,7 @@ const trustIndicators = [
 ];
 
 export default function Landing() {
+  const { user, isAdmin } = useAuth();
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -77,12 +79,22 @@ export default function Landing() {
               Fast, reliable, and professional service with 15+ years of experience.
             </p>
             <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-0">
-              <Button asChild size="xl" variant="secondary" className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold">
-                <Link to="/register">Get Started</Link>
-              </Button>
-              <Button asChild variant="outline" size="xl" className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto min-h-[48px] text-base font-semibold">
-                <Link to="/login">Sign In</Link>
-              </Button>
+              {user ? (
+                <Button asChild size="xl" variant="secondary" className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold">
+                  <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'}>
+                    Go to Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="xl" variant="secondary" className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold">
+                    <Link to="/register">Get Started</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="xl" className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto min-h-[48px] text-base font-semibold">
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

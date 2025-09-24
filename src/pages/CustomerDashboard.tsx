@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { LogOut, User, Mail, Phone, Calendar } from 'lucide-react';
+import { LogOut, User, Mail, Phone, Calendar, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useService } from '@/contexts/ServiceContext';
 
 const CustomerDashboard: React.FC = () => {
   const { user, userProfile, signOut } = useAuth();
+  const { requests } = useService();
+  const historyRef = useRef<HTMLDivElement | null>(null);
+  const myRequests = useMemo(() => {
+    if (!user?.uid) return [] as any[];
+    return requests
+      .filter(r => r.userId === user.uid)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [requests, user?.uid]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,6 +33,12 @@ const CustomerDashboard: React.FC = () => {
               </Badge>
             </div>
             <div className="flex items-center space-x-4">
+              <Button asChild variant="outline">
+                <Link to="/">
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Link>
+              </Button>
               <span className="text-sm text-gray-600">
                 Welcome, {userProfile?.name || user?.displayName || 'Customer'}
               </span>
@@ -103,7 +119,9 @@ const CustomerDashboard: React.FC = () => {
               <CardContent>
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-4">No service requests yet</p>
-                  <Button>Create New Request</Button>
+                  <Button asChild>
+                    <Link to="/request">Create New Request</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -120,7 +138,7 @@ const CustomerDashboard: React.FC = () => {
                 <Button className="w-full justify-start" variant="outline">
                   Update Profile
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button className="w-full justify-start" variant="outline" onClick={() => historyRef.current?.scrollIntoView({ behavior: 'smooth' })}>
                   View Service History
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
@@ -131,17 +149,39 @@ const CustomerDashboard: React.FC = () => {
           </div>
 
           {/* Recent Activity */}
-          <Card className="mt-6">
+          <Card className="mt-6" ref={historyRef}>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>Your Service History</CardTitle>
               <CardDescription>
-                Your latest account activity
+                All your submitted requests and their current status
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <p className="text-gray-500">No recent activity</p>
-              </div>
+              {myRequests.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No requests yet. Create your first request.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myRequests.map((r) => (
+                    <div key={r.id} className="rounded-md border p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                          <div className="font-semibold">{r.id}</div>
+                          <div className="text-sm text-gray-600">{r.serviceType}</div>
+                        </div>
+                        <div className="text-sm">
+                          <span className="px-2 py-1 rounded bg-gray-100">{r.status}</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Submitted on {new Date(r.createdAt).toLocaleString()}
+                      </div>
+                      <div className="mt-2 text-sm">{r.description}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

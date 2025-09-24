@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useService } from '@/contexts/ServiceContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Monitor, Printer, Camera, Network, Settings, ArrowLeft, CheckCircle } from 'lucide-react';
 
@@ -23,6 +24,7 @@ export default function ServiceRequest() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addRequest } = useService();
+  const { user, signInWithPhone, verifyPhoneCode } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [ticketNumber, setTicketNumber] = useState('');
   
@@ -39,6 +41,11 @@ export default function ServiceRequest() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpConfirmation, setOtpConfirmation] = useState<any>(null);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -54,12 +61,21 @@ export default function ServiceRequest() {
       newErrors.customService = 'Please specify the custom service needed';
     }
     if (!formData.preferredDate) newErrors.preferredDate = 'Preferred date is required';
+    // Do not allow a date earlier than today
+    if (formData.preferredDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selected = new Date(formData.preferredDate);
+      if (selected < today) {
+        newErrors.preferredDate = 'Preferred date cannot be earlier than today';
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -72,7 +88,31 @@ export default function ServiceRequest() {
     }
 
     try {
-      const ticketId = addRequest(formData as any);
+      if (!user?.uid) {
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in to submit a service request.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!otpVerified) {
+        toast({
+          title: "OTP required",
+          description: "Please verify the OTP sent to your phone before submitting.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        userId: user.uid,
+      };
+      
+      console.log('Submitting payload:', payload);
+      const ticketId = await addRequest(payload);
       setTicketNumber(ticketId);
       setIsSubmitted(true);
       
@@ -81,11 +121,40 @@ export default function ServiceRequest() {
         description: `Your ticket number is ${ticketId}. We'll contact you soon!`,
       });
     } catch (error) {
+      console.error('Error submitting request:', error);
       toast({
         title: "Error",
         description: "Failed to submit request. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!formData.phone) {
+      setErrors(prev => ({ ...prev, phone: 'Phone number is required' }));
+      return;
+    }
+    try {
+      const confirmation = await signInWithPhone(formData.phone);
+      setOtpConfirmation(confirmation);
+      setOtpSent(true);
+    } catch (err) {
+      // Error toasts are handled in auth context
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpConfirmation || !otpCode) return;
+    setOtpVerifying(true);
+    try {
+      await verifyPhoneCode(otpConfirmation, otpCode);
+      setOtpVerified(true);
+      toast({ title: 'Phone verified', description: 'OTP verification succeeded.' });
+    } catch (err) {
+      setOtpVerified(false);
+    } finally {
+      setOtpVerifying(false);
     }
   };
 
@@ -236,6 +305,11 @@ export default function ServiceRequest() {
                       {errors.phone && (
                         <p className="text-sm text-destructive mt-1">{errors.phone}</p>
                       )}
+                      <div className="flex gap-2 mt-2">
+                        <Button type="button" variant="secondary" onClick={handleSendOtp} disabled={otpSent && !otpVerified}>
+                          {otpSent ? (otpVerified ? 'Verified' : 'Resend OTP') : 'Send OTP'}
+                        </Button>
+                      </div>
                     </div>
                     
                     <div>
@@ -253,6 +327,27 @@ export default function ServiceRequest() {
                       )}
                     </div>
                   </div>
+
+                  {otpSent && !otpVerified && (
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                      <div>
+                        <Label htmlFor="otp" className="text-sm sm:text-base">Enter OTP</Label>
+                        <Input
+                          id="otp"
+                          inputMode="numeric"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          placeholder="6-digit code"
+                          className="min-h-[44px] text-base"
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button type="button" onClick={handleVerifyOtp} disabled={otpVerifying || otpCode.length < 6} className="min-h-[44px]">
+                          {otpVerifying ? 'Verifying...' : 'Verify OTP'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <Label htmlFor="address">Service Address *</Label>
@@ -342,7 +437,7 @@ export default function ServiceRequest() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Button type="submit" size="lg" className="flex-1 min-h-[48px]">
+                    <Button type="submit" size="lg" className="flex-1 min-h-[48px]" disabled={!otpVerified}>
                       Submit Service Request
                     </Button>
                     <Button type="button" variant="outline" onClick={() => navigate('/')} className="min-h-[48px]">

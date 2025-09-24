@@ -1,7 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  getDocs, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db } from '../firebase';
 
 export interface ServiceRequest {
   id: string;
+  userId?: string;
   customerName: string;
   email: string;
   phone: string;
@@ -12,16 +26,17 @@ export interface ServiceRequest {
   urgency: 'Low' | 'Medium' | 'High';
   preferredDate: string;
   status: 'Pending' | 'In Progress' | 'Completed';
-  createdAt: string;
-  updatedAt: string;
+  createdAt: unknown; // Firestore timestamp
+  updatedAt: unknown; // Firestore timestamp
 }
 
 interface ServiceContextType {
   requests: ServiceRequest[];
-  addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => string;
-  updateRequestStatus: (id: string, status: ServiceRequest['status']) => void;
-  getRequestsByContact: (emailOrPhone: string) => ServiceRequest[];
+  addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
+  updateRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
+  getRequestsByContact: (emailOrPhone: string) => Promise<ServiceRequest[]>;
   getRequestById: (id: string) => ServiceRequest | undefined;
+  loading: boolean;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
@@ -74,51 +89,126 @@ const mockRequests: ServiceRequest[] = [
 
 export function ServiceProvider({ children }: { children: React.ReactNode }) {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load data from localStorage on mount
+  // Listen to all service requests in real-time (skip when Firebase envs are missing)
   useEffect(() => {
-    const saved = localStorage.getItem('satisfied-computers-requests');
-    if (saved) {
-      setRequests(JSON.parse(saved));
-    } else {
-      setRequests(mockRequests);
+    const hasEnv = Boolean(import.meta.env.VITE_FIREBASE_API_KEY && import.meta.env.VITE_FIREBASE_PROJECT_ID);
+    if (!db || !hasEnv) {
+      setLoading(false);
+      return;
     }
+
+    const q = query(
+      collection(db, 'serviceRequests'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const requestsData: ServiceRequest[] = [];
+      snapshot.forEach((doc) => {
+        requestsData.push({
+          id: doc.id,
+          ...doc.data()
+        } as ServiceRequest);
+      });
+      setRequests(requestsData);
+      setLoading(false);
+    }, (error) => {
+      console.warn('Firestore listen error (possibly due to invalid config):', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // Save to localStorage whenever requests change
-  useEffect(() => {
-    localStorage.setItem('satisfied-computers-requests', JSON.stringify(requests));
-  }, [requests]);
+  const addRequest = async (newRequest: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
+    if (!db) {
+      throw new Error('Firebase not initialized');
+    }
 
-  const addRequest = (newRequest: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
-    const id = `SC-${String(requests.length + 1).padStart(3, '0')}`;
-    const now = new Date().toISOString();
-    
-    const request: ServiceRequest = {
-      ...newRequest,
-      id,
-      status: 'Pending',
-      createdAt: now,
-      updatedAt: now
-    };
+    try {
+      // Validate required fields
+      if (!newRequest.customerName || !newRequest.email || !newRequest.phone || !newRequest.address || !newRequest.serviceType || !newRequest.description) {
+        throw new Error('Missing required fields');
+      }
 
-    setRequests(prev => [...prev, request]);
-    return id;
+      const requestData = {
+        userId: newRequest.userId || null,
+        customerName: newRequest.customerName,
+        email: newRequest.email,
+        phone: newRequest.phone,
+        address: newRequest.address,
+        serviceType: newRequest.serviceType,
+        description: newRequest.description,
+        customService: newRequest.customService || null,
+        urgency: newRequest.urgency,
+        preferredDate: newRequest.preferredDate,
+        status: 'Pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      console.log('Adding request to Firestore:', requestData);
+      const docRef = await addDoc(collection(db, 'serviceRequests'), requestData);
+      console.log('Request added with ID:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding service request:', error);
+      throw error;
+    }
   };
 
-  const updateRequestStatus = (id: string, status: ServiceRequest['status']) => {
-    setRequests(prev => prev.map(req => 
-      req.id === id 
-        ? { ...req, status, updatedAt: new Date().toISOString() }
-        : req
-    ));
+  const updateRequestStatus = async (id: string, status: ServiceRequest['status']) => {
+    if (!db) {
+      throw new Error('Firebase not initialized');
+    }
+
+    try {
+      await updateDoc(doc(db, 'serviceRequests', id), {
+        status,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating service request:', error);
+      throw error;
+    }
   };
 
-  const getRequestsByContact = (emailOrPhone: string) => {
-    return requests.filter(req => 
-      req.email.toLowerCase() === emailOrPhone.toLowerCase() || 
-      req.phone === emailOrPhone
-    );
+  const getRequestsByContact = async (emailOrPhone: string) => {
+    if (!db) {
+      return [];
+    }
+
+    try {
+      const q = query(
+        collection(db, 'serviceRequests'),
+        where('email', '==', emailOrPhone.toLowerCase())
+      );
+      
+      const phoneQuery = query(
+        collection(db, 'serviceRequests'),
+        where('phone', '==', emailOrPhone)
+      );
+
+      const [emailSnapshot, phoneSnapshot] = await Promise.all([
+        getDocs(q),
+        getDocs(phoneQuery)
+      ]);
+
+      const results: ServiceRequest[] = [];
+      emailSnapshot.forEach((doc) => {
+        results.push({ id: doc.id, ...doc.data() } as ServiceRequest);
+      });
+      phoneSnapshot.forEach((doc) => {
+        results.push({ id: doc.id, ...doc.data() } as ServiceRequest);
+      });
+
+      return results;
+    } catch (error) {
+      console.error('Error getting requests by contact:', error);
+      return [];
+    }
   };
 
   const getRequestById = (id: string) => {
@@ -130,7 +220,8 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     addRequest,
     updateRequestStatus,
     getRequestsByContact,
-    getRequestById
+    getRequestById,
+    loading
   };
 
   return (
