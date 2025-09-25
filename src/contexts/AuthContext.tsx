@@ -10,9 +10,6 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   GithubAuthProvider,
-  signInWithPhoneNumber,
-  RecaptchaVerifier,
-  ConfirmationResult,
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -31,8 +28,8 @@ export interface UserProfile {
     state: string;
     zipCode: string;
   };
-  createdAt: any; // Firestore timestamp
-  updatedAt: any; // Firestore timestamp
+  createdAt: unknown; // Firestore timestamp
+  updatedAt: unknown; // Firestore timestamp
 }
 
 // Auth context interface
@@ -45,8 +42,6 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
   signInWithGitHub: () => Promise<void>;
-  signInWithPhone: (phoneNumber: string) => Promise<ConfirmationResult>;
-  verifyPhoneCode: (confirmationResult: ConfirmationResult, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -63,40 +58,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Check if user is admin
   const isAdmin = user?.email === 'admin@satisfiedcomputers.com';
 
-  // Initialize reCAPTCHA verifier for phone auth
-  useEffect(() => {
-    if (typeof window !== 'undefined' && auth && auth.app) {
-      try {
-        // Clear any existing verifier
-        if (window.recaptchaVerifier) {
-          window.recaptchaVerifier.clear();
-        }
-        
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber
-          },
-          'expired-callback': () => {
-            toast.error('reCAPTCHA expired. Please try again.');
-          }
-        });
-      } catch (error) {
-        console.error('Error initializing reCAPTCHA:', error);
-      }
-    }
-
-    // Cleanup function
-    return () => {
-      if (typeof window !== 'undefined' && window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (error) {
-          console.error('Error clearing reCAPTCHA:', error);
-        }
-      }
-    };
-  }, [auth]);
 
   // Handle redirect result for providers (useful on hosting/iOS/Safari)
   useEffect(() => {
@@ -105,7 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const result = await getRedirectResult(auth);
         if (result?.user) {
           // If new user, create profile
-          if (result.additionalUserInfo?.isNewUser) {
+          if ((result as any).additionalUserInfo?.isNewUser) {
             const u = result.user;
             await setDoc(doc(db, 'users', u.uid), {
               uid: u.uid,
@@ -171,9 +132,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Successfully signed in!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
-      toast.error(getErrorMessage(error.code));
+      toast.error(getErrorMessage((error as { code: string }).code));
     }
   };
 
@@ -200,9 +161,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       await setDoc(doc(db, 'users', user.uid), userProfile);
       toast.success('Account created successfully!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
-      toast.error(getErrorMessage(error.code));
+      toast.error(getErrorMessage((error as { code: string }).code));
     }
   };
 
@@ -219,11 +180,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let result;
       try {
         result = await signInWithPopup(auth, provider);
-      } catch (popupError: any) {
+      } catch (popupError: unknown) {
         const shouldFallback =
-          popupError?.code === 'auth/popup-blocked' ||
-          popupError?.code === 'auth/popup-closed-by-user' ||
-          popupError?.code === 'auth/operation-not-supported-in-this-environment';
+          (popupError as { code?: string })?.code === 'auth/popup-blocked' ||
+          (popupError as { code?: string })?.code === 'auth/popup-closed-by-user' ||
+          (popupError as { code?: string })?.code === 'auth/operation-not-supported-in-this-environment';
         if (shouldFallback) {
           await signInWithRedirect(auth, provider);
           return;
@@ -232,7 +193,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       // Check if this is a new user and create profile
-      if (result.additionalUserInfo?.isNewUser) {
+      if ((result as any).additionalUserInfo?.isNewUser) {
         const user = result.user;
         const userProfile: UserProfile = {
           uid: user.uid,
@@ -246,9 +207,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       toast.success('Successfully signed in with Google!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google sign in error:', error);
-      toast.error(getErrorMessage(error.code));
+      toast.error(getErrorMessage((error as { code: string }).code));
     }
   };
 
@@ -264,7 +225,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const result = await signInWithPopup(auth, provider);
       
       // Check if this is a new user and create profile
-      if (result.additionalUserInfo?.isNewUser) {
+      if ((result as any).additionalUserInfo?.isNewUser) {
         const user = result.user;
         const userProfile: UserProfile = {
           uid: user.uid,
@@ -278,9 +239,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       toast.success('Successfully signed in with Facebook!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Facebook sign in error:', error);
-      toast.error(getErrorMessage(error.code));
+      toast.error(getErrorMessage((error as { code: string }).code));
     }
   };
 
@@ -296,7 +257,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const result = await signInWithPopup(auth, provider);
       
       // Check if this is a new user and create profile
-      if (result.additionalUserInfo?.isNewUser) {
+      if ((result as any).additionalUserInfo?.isNewUser) {
         const user = result.user;
         const userProfile: UserProfile = {
           uid: user.uid,
@@ -310,65 +271,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       toast.success('Successfully signed in with GitHub!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('GitHub sign in error:', error);
-      toast.error(getErrorMessage(error.code));
+      toast.error(getErrorMessage((error as { code: string }).code));
     }
   };
 
-  // Phone number sign in
-  const signInWithPhone = async (phoneNumber: string): Promise<ConfirmationResult> => {
-    if (!auth || !db) {
-      toast.error('Firebase not initialized. Please check your configuration.');
-      throw new Error('Firebase not initialized');
-    }
-    
-    try {
-      if (!window.recaptchaVerifier) {
-        throw new Error('reCAPTCHA not initialized. Please refresh the page and try again.');
-      }
-      
-      const appVerifier = window.recaptchaVerifier;
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-      toast.success('OTP sent to your phone number!');
-      return confirmationResult;
-    } catch (error: any) {
-      console.error('Phone sign in error:', error);
-      toast.error(getErrorMessage(error.code));
-      throw error;
-    }
-  };
-
-  // Verify phone code
-  const verifyPhoneCode = async (confirmationResult: ConfirmationResult, code: string) => {
-    if (!db) {
-      toast.error('Firebase not initialized. Please check your configuration.');
-      return;
-    }
-    
-    try {
-      const result = await confirmationResult.confirm(code);
-      
-      // Check if this is a new user and create profile
-      if (result.additionalUserInfo?.isNewUser) {
-        const user = result.user;
-        const userProfile: UserProfile = {
-          uid: user.uid,
-          name: 'Phone User', // Default name for phone users
-          email: user.email || '',
-          phone: user.phoneNumber || '',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        await setDoc(doc(db, 'users', user.uid), userProfile);
-      }
-      
-      toast.success('Phone number verified successfully!');
-    } catch (error: any) {
-      console.error('Phone verification error:', error);
-      toast.error(getErrorMessage(error.code));
-    }
-  };
 
   // Sign out
   const signOut = async () => {
@@ -380,7 +288,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await firebaseSignOut(auth);
       toast.success('Successfully signed out!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out');
     }
@@ -395,8 +303,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signInWithGoogle,
     signInWithFacebook,
     signInWithGitHub,
-    signInWithPhone,
-    verifyPhoneCode,
     signOut,
     isAdmin
   };
@@ -436,12 +342,6 @@ const getErrorMessage = (errorCode: string): string => {
       return 'Too many failed attempts. Please try again later.';
     case 'auth/network-request-failed':
       return 'Network error. Please check your connection.';
-    case 'auth/invalid-phone-number':
-      return 'Invalid phone number format.';
-    case 'auth/invalid-verification-code':
-      return 'Invalid verification code.';
-    case 'auth/code-expired':
-      return 'Verification code has expired.';
     case 'auth/popup-closed-by-user':
       return 'Sign-in popup was closed. Please try again.';
     case 'auth/cancelled-popup-request':
@@ -451,9 +351,3 @@ const getErrorMessage = (errorCode: string): string => {
   }
 };
 
-// Declare global types for reCAPTCHA
-declare global {
-  interface Window {
-    recaptchaVerifier: RecaptchaVerifier;
-  }
-}

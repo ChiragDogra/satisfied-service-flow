@@ -20,7 +20,7 @@ export default function Status() {
       return;
     }
     // Try ticket ID first
-    const byId = getRequestById(trimmed);
+    const byId = await getRequestById(trimmed);
     if (byId) {
       setResults([byId]);
       return;

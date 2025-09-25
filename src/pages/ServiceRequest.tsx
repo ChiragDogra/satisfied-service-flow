@@ -24,7 +24,7 @@ export default function ServiceRequest() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addRequest } = useService();
-  const { user, signInWithPhone, verifyPhoneCode } = useAuth();
+  const { user } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [ticketNumber, setTicketNumber] = useState('');
   
@@ -41,11 +41,6 @@ export default function ServiceRequest() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpConfirmation, setOtpConfirmation] = useState<any>(null);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -97,14 +92,6 @@ export default function ServiceRequest() {
         return;
       }
 
-      if (!otpVerified) {
-        toast({
-          title: "OTP required",
-          description: "Please verify the OTP sent to your phone before submitting.",
-          variant: "destructive",
-        });
-        return;
-      }
 
       const payload = {
         ...formData,
@@ -130,33 +117,6 @@ export default function ServiceRequest() {
     }
   };
 
-  const handleSendOtp = async () => {
-    if (!formData.phone) {
-      setErrors(prev => ({ ...prev, phone: 'Phone number is required' }));
-      return;
-    }
-    try {
-      const confirmation = await signInWithPhone(formData.phone);
-      setOtpConfirmation(confirmation);
-      setOtpSent(true);
-    } catch (err) {
-      // Error toasts are handled in auth context
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpConfirmation || !otpCode) return;
-    setOtpVerifying(true);
-    try {
-      await verifyPhoneCode(otpConfirmation, otpCode);
-      setOtpVerified(true);
-      toast({ title: 'Phone verified', description: 'OTP verification succeeded.' });
-    } catch (err) {
-      setOtpVerified(false);
-    } finally {
-      setOtpVerifying(false);
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -305,11 +265,6 @@ export default function ServiceRequest() {
                       {errors.phone && (
                         <p className="text-sm text-destructive mt-1">{errors.phone}</p>
                       )}
-                      <div className="flex gap-2 mt-2">
-                        <Button type="button" variant="secondary" onClick={handleSendOtp} disabled={otpSent && !otpVerified}>
-                          {otpSent ? (otpVerified ? 'Verified' : 'Resend OTP') : 'Send OTP'}
-                        </Button>
-                      </div>
                     </div>
                     
                     <div>
@@ -328,26 +283,6 @@ export default function ServiceRequest() {
                     </div>
                   </div>
 
-                  {otpSent && !otpVerified && (
-                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
-                      <div>
-                        <Label htmlFor="otp" className="text-sm sm:text-base">Enter OTP</Label>
-                        <Input
-                          id="otp"
-                          inputMode="numeric"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value)}
-                          placeholder="6-digit code"
-                          className="min-h-[44px] text-base"
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <Button type="button" onClick={handleVerifyOtp} disabled={otpVerifying || otpCode.length < 6} className="min-h-[44px]">
-                          {otpVerifying ? 'Verifying...' : 'Verify OTP'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
 
                   <div>
                     <Label htmlFor="address">Service Address *</Label>
@@ -437,7 +372,7 @@ export default function ServiceRequest() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Button type="submit" size="lg" className="flex-1 min-h-[48px]" disabled={!otpVerified}>
+                    <Button type="submit" size="lg" className="flex-1 min-h-[48px]">
                       Submit Service Request
                     </Button>
                     <Button type="button" variant="outline" onClick={() => navigate('/')} className="min-h-[48px]">

@@ -35,7 +35,7 @@ interface ServiceContextType {
   addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
   getRequestsByContact: (emailOrPhone: string) => Promise<ServiceRequest[]>;
-  getRequestById: (id: string) => ServiceRequest | undefined;
+  getRequestById: (id: string) => Promise<ServiceRequest | undefined>;
   loading: boolean;
 }
 
@@ -115,7 +115,10 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
       setRequests(requestsData);
       setLoading(false);
     }, (error) => {
-      console.warn('Firestore listen error (possibly due to invalid config):', error);
+      // Only log error if it's not a configuration issue
+      if (error.code !== 'permission-denied' && error.code !== 'unavailable') {
+        console.warn('Firestore listen error:', error);
+      }
       setLoading(false);
     });
 
@@ -211,8 +214,26 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getRequestById = (id: string) => {
-    return requests.find(req => req.id === id);
+  const getRequestById = async (id: string) => {
+    // First try to find in current requests
+    const found = requests.find(req => req.id === id);
+    if (found) return found;
+    
+    // If not found in memory, try to fetch from Firestore
+    if (!db) return undefined;
+    
+    try {
+      const docRef = doc(db, 'serviceRequests', id);
+      const docSnap = await getDocs(query(collection(db, 'serviceRequests'), where('__name__', '==', id)));
+      if (!docSnap.empty) {
+        const doc = docSnap.docs[0];
+        return { id: doc.id, ...doc.data() } as ServiceRequest;
+      }
+    } catch (error) {
+      console.error('Error fetching request by ID:', error);
+    }
+    
+    return undefined;
   };
 
   const value: ServiceContextType = {
