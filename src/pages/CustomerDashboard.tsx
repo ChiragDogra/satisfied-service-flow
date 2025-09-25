@@ -6,20 +6,21 @@ import { Badge } from '../components/ui/badge';
 import { LogOut, User, Mail, Phone, Calendar, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useService } from '@/contexts/ServiceContext';
-
 const CustomerDashboard: React.FC = () => {
-  const { user, userProfile, signOut } = useAuth();
-  const { requests } = useService();
+  const {
+    user,
+    userProfile,
+    signOut
+  } = useAuth();
+  const {
+    requests
+  } = useService();
   const historyRef = useRef<HTMLDivElement | null>(null);
   const myRequests = useMemo(() => {
     if (!user?.uid) return [] as any[];
-    return requests
-      .filter(r => r.userId === user.uid)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return requests.filter(r => r.userId === user.uid).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [requests, user?.uid]);
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,10 +35,7 @@ const CustomerDashboard: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Button asChild variant="outline">
-                <Link to="/">
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
-                </Link>
+                
               </Button>
               <span className="text-sm text-gray-600">
                 Welcome, {userProfile?.name || user?.displayName || 'Customer'}
@@ -84,18 +82,15 @@ const CustomerDashboard: React.FC = () => {
                   </div>
                 </div>
                 
-                {userProfile?.phone && (
-                  <div className="flex items-center space-x-3">
+                {userProfile?.phone && <div className="flex items-center space-x-3">
                     <Phone className="w-4 h-4 text-gray-400" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Phone</p>
                       <p className="text-sm text-gray-600">{userProfile.phone}</p>
                     </div>
-                  </div>
-                )}
+                  </div>}
 
-                {userProfile?.createdAt && (
-                  <div className="flex items-center space-x-3">
+                {userProfile?.createdAt && <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-gray-400" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Member Since</p>
@@ -103,8 +98,7 @@ const CustomerDashboard: React.FC = () => {
                         {new Date(userProfile.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
 
@@ -138,7 +132,9 @@ const CustomerDashboard: React.FC = () => {
                 <Button className="w-full justify-start" variant="outline">
                   Update Profile
                 </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => historyRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+                <Button className="w-full justify-start" variant="outline" onClick={() => historyRef.current?.scrollIntoView({
+                behavior: 'smooth'
+              })}>
                   View Service History
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
@@ -157,14 +153,10 @@ const CustomerDashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {myRequests.length === 0 ? (
-                <div className="text-center py-8">
+              {myRequests.length === 0 ? <div className="text-center py-8">
                   <p className="text-gray-500">No requests yet. Create your first request.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {myRequests.map((r) => (
-                    <div key={r.id} className="rounded-md border p-4">
+                </div> : <div className="space-y-3">
+                  {myRequests.map(r => <div key={r.id} className="rounded-md border p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div>
                           <div className="font-semibold">{r.id}</div>
@@ -178,16 +170,12 @@ const CustomerDashboard: React.FC = () => {
                         Submitted on {new Date(r.createdAt).toLocaleString()}
                       </div>
                       <div className="mt-2 text-sm">{r.description}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    </div>)}
+                </div>}
             </CardContent>
           </Card>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default CustomerDashboard;
