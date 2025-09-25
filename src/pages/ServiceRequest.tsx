@@ -33,10 +33,10 @@ export default function ServiceRequest() {
     email: '',
     phone: '',
     address: '',
-    serviceType: '',
+    serviceType: '' as 'Computer Repair' | 'Printer Repair' | 'CCTV Repair' | 'Networking' | 'Other Services' | '',
     description: '',
     customService: '',
-    urgency: 'Medium',
+    urgency: 'Medium' as 'Low' | 'Medium' | 'High',
     preferredDate: ''
   });
 
@@ -96,6 +96,7 @@ export default function ServiceRequest() {
       const payload = {
         ...formData,
         userId: user.uid,
+        serviceType: formData.serviceType as 'Computer Repair' | 'Printer Repair' | 'CCTV Repair' | 'Networking' | 'Other Services'
       };
       
       console.log('Submitting payload:', payload);

@@ -16,7 +16,8 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
   const [step, setStep] = useState<'phone' | 'verify'>('phone');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const { signInWithPhone, verifyPhoneCode } = useAuth();
+// Phone authentication not implemented yet - commenting out for now
+// const { signInWithPhone, verifyPhoneCode } = useAuth();
 
   const handleSendCode = async () => {
     if (!phoneNumber.trim()) {
@@ -25,11 +26,9 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
 
     setLoading(true);
     try {
-      // Format phone number (add +1 if not present)
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber}`;
-      const result = await signInWithPhone(formattedPhone);
-      setConfirmationResult(result);
-      setStep('verify');
+      // Phone authentication not implemented yet
+      console.error('Phone authentication not yet implemented');
+      // TODO: Implement phone authentication
     } catch (error) {
       console.error('Error sending code:', error);
     } finally {
@@ -44,7 +43,9 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
 
     setLoading(true);
     try {
-      await verifyPhoneCode(confirmationResult, verificationCode);
+      // Phone authentication not implemented yet
+      console.error('Phone verification not yet implemented');
+      // TODO: Implement phone verification
       onClose();
     } catch (error) {
       console.error('Error verifying code:', error);
