@@ -5,6 +5,8 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useAuth } from '../contexts/AuthContext';
 import { ConfirmationResult } from 'firebase/auth';
+import { toast } from 'sonner';
+import { validatePhoneNumber, formatPhoneNumber, validateIndianPhoneNumber } from '../lib/auth-utils';
 
 interface PhoneLoginProps {
   onClose: () => void;
@@ -16,21 +18,40 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
   const [step, setStep] = useState<'phone' | 'verify'>('phone');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
-// Phone authentication not implemented yet - commenting out for now
-// const { signInWithPhone, verifyPhoneCode } = useAuth();
+  const [error, setError] = useState('');
+  const { signInWithPhone, verifyPhoneCode } = useAuth();
+
 
   const handleSendCode = async () => {
     if (!phoneNumber.trim()) {
+      setError('Please enter a phone number');
       return;
     }
 
+    setError('');
     setLoading(true);
+    
     try {
-      // Phone authentication not implemented yet
-      console.error('Phone authentication not yet implemented');
-      // TODO: Implement phone authentication
-    } catch (error) {
+      // Format phone number
+      const formattedPhone = formatPhoneNumber(phoneNumber);
+      
+      // Validate phone number (use Indian-specific validation)
+      if (!validateIndianPhoneNumber(formattedPhone)) {
+        setError('Please enter a valid Indian mobile number (e.g., +919876543210 or 9876543210)');
+        setLoading(false);
+        return;
+      }
+
+      // Send verification code
+      const result = await signInWithPhone(formattedPhone);
+      setConfirmationResult(result);
+      setStep('verify');
+      setPhoneNumber(formattedPhone); // Update with formatted number
+    } catch (error: unknown) {
       console.error('Error sending code:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send verification code';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -38,17 +59,21 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
 
   const handleVerifyCode = async () => {
     if (!verificationCode.trim() || !confirmationResult) {
+      setError('Please enter the verification code');
       return;
     }
 
+    setError('');
     setLoading(true);
+    
     try {
-      // Phone authentication not implemented yet
-      console.error('Phone verification not yet implemented');
-      // TODO: Implement phone verification
+      await verifyPhoneCode(confirmationResult, verificationCode);
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error verifying code:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to verify code';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -58,6 +83,19 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
     setStep('phone');
     setConfirmationResult(null);
     setVerificationCode('');
+    setError('');
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPhoneNumber(value);
+    setError(''); // Clear error when user starts typing
+  };
+
+  const handleVerificationCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+    setVerificationCode(value);
+    setError(''); // Clear error when user starts typing
   };
 
   return (
@@ -73,6 +111,12 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              {error}
+            </div>
+          )}
+          
           {step === 'phone' ? (
             <>
               <div className="space-y-2">
@@ -80,13 +124,14 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+1234567890"
+                  placeholder="+919876543210 or 9876543210"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={handlePhoneNumberChange}
                   disabled={loading}
+                  className={error ? 'border-red-500' : ''}
                 />
                 <p className="text-sm text-gray-500">
-                  Include country code (e.g., +1 for US)
+                  Enter 10-digit Indian mobile number (starts with 6, 7, 8, or 9) or include +91
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -111,8 +156,10 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
                   type="text"
                   placeholder="123456"
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
+                  onChange={handleVerificationCodeChange}
                   disabled={loading}
+                  maxLength={6}
+                  className={error ? 'border-red-500' : ''}
                 />
                 <p className="text-sm text-gray-500">
                   Code sent to {phoneNumber}
@@ -121,7 +168,7 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
               <div className="flex space-x-2">
                 <Button 
                   onClick={handleVerifyCode} 
-                  disabled={loading || !verificationCode.trim()}
+                  disabled={loading || !verificationCode.trim() || verificationCode.length !== 6}
                   className="flex-1"
                 >
                   {loading ? 'Verifying...' : 'Verify Code'}
@@ -142,7 +189,3 @@ const PhoneLogin: React.FC<PhoneLoginProps> = ({ onClose }) => {
 };
 
 export default PhoneLogin;
-
-
-
-

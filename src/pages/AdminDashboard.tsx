@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { LogOut, Shield, Users, Settings, BarChart3 } from 'lucide-react';
+import EmailVerification from '@/components/EmailVerification';
 
 const AdminDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -37,6 +38,8 @@ const AdminDashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Email Verification Check */}
+        <EmailVerification />
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">

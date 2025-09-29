@@ -7,6 +7,7 @@ import { User, Mail, Phone, Calendar, Plus, History, Settings, MessageCircle, Ch
 import { Link } from 'react-router-dom';
 import { useService } from '@/contexts/ServiceContext';
 import Header from '@/components/Header';
+import EmailVerification from '@/components/EmailVerification';
 const CustomerDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const { requests } = useService();
@@ -33,6 +34,9 @@ const CustomerDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Email Verification Check */}
+      <EmailVerification />
       
       {/* Hero Section */}
       <section className="bg-gradient-primary text-primary-foreground">

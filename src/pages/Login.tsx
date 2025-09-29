@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Separator } from '../components/ui/separator';
 import { useAuth } from '../contexts/AuthContext';
 import PhoneLogin from '../components/PhoneLogin';
+import ForgotPassword from '../components/ForgotPassword';
 import { Eye, EyeOff, Mail, Lock, Phone } from 'lucide-react';
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -34,6 +35,8 @@ const Login: React.FC = () => {
       });
     }
   }, [user, isAdmin, navigate, location]);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
@@ -42,6 +45,7 @@ const Login: React.FC = () => {
       await signIn(email, password);
     } catch (error) {
       console.error('Login error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -119,6 +123,18 @@ const Login: React.FC = () => {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between mb-2">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                  onClick={() => setShowForgotPassword(true)}
+                  disabled={loading}
+                >
+                  Forgot password?
+                </Button>
+              </div>
+
               <Button type="submit" className="w-full" disabled={loading || !email.trim() || !password.trim()}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
@@ -165,6 +181,9 @@ const Login: React.FC = () => {
 
       {/* Phone Login Modal */}
       {showPhoneLogin && <PhoneLogin onClose={() => setShowPhoneLogin(false)} />}
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && <ForgotPassword onBack={() => setShowForgotPassword(false)} />}
     </div>;
 };
 export default Login;
