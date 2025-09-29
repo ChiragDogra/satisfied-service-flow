@@ -105,6 +105,8 @@ const getAuthErrorMessage = (errorCode: string): string => {
       return 'This operation requires recent authentication. Please sign in again.';
     case 'auth/invalid-credential':
       return 'Invalid credentials. Please check your email and password.';
+    case 'auth/unauthorized-continue-uri':
+      return 'Domain not authorized for password reset. Please contact support.';
     default:
       return 'An error occurred. Please try again.';
   }
@@ -511,9 +513,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       console.log('Sending password reset email to:', email);
+      
+      // Get the current origin and ensure it's properly formatted
+      const currentOrigin = window.location.origin;
+      const continueUrl = `${currentOrigin}/login`;
+      
+      console.log('Using continue URL:', continueUrl);
+      
       await sendPasswordResetEmail(auth, email, {
         handleCodeInApp: false, // Set to true if you want to handle the reset in your app
-        url: window.location.origin + '/login' // Redirect URL after password reset
+        url: continueUrl // Redirect URL after password reset
       });
       console.log('Password reset email sent successfully');
       toast.success('Password reset email sent! Check your inbox.');
@@ -523,7 +532,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const authError = error as AuthError;
       console.error('Error code:', authError.code);
       console.error('Error message:', authError.message);
-      toast.error(getAuthErrorMessage(authError.code));
+      
+      // Provide specific guidance for unauthorized domain error
+      if (authError.code === 'auth/unauthorized-continue-uri') {
+        console.error('Domain not allowlisted. Current origin:', window.location.origin);
+        toast.error('Domain not authorized. Please contact support or check Firebase configuration.');
+      } else {
+        toast.error(getAuthErrorMessage(authError.code));
+      }
       return false;
     }
   };
