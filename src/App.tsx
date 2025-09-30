@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ServiceProvider } from "./contexts/ServiceContext";
+import { AdminProvider } from "./contexts/AdminContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FirebaseSetup from "./components/FirebaseSetup";
 import Login from "./pages/Login";
@@ -39,7 +40,8 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ServiceProvider>
-        <TooltipProvider>
+          <AdminProvider>
+            <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -79,7 +81,8 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
+            </TooltipProvider>
+          </AdminProvider>
         </ServiceProvider>
       </AuthProvider>
     </QueryClientProvider>

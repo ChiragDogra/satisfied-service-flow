@@ -155,7 +155,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [emailVerificationState, setEmailVerificationState] = useState(false);
 
   // Check if user is admin
-  const isAdmin = user?.email === 'admin@satisfiedcomputers.com';
+  const isAdmin = user?.email === 'satisfiedcomputers@gmail.com';
   
   // Check if email is verified (admin is always considered verified)
   const isEmailVerified = isAdmin || (user?.emailVerified ?? false);
@@ -207,7 +207,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (user) {
         // Load user profile from Firestore (only for customers, not admin)
-        if (user.email !== 'admin@satisfiedcomputers.com') {
+        if (user.email !== 'satisfiedcomputers@gmail.com') {
           try {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
@@ -218,7 +218,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             toast.error('Failed to load user profile');
           }
         } else {
-          setUserProfile(null); // Admin doesn't have a profile
+          // Admin doesn't have a customer profile
+          setUserProfile(null);
         }
       } else {
         setUserProfile(null);
