@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PhoneLogin from '../components/PhoneLogin';
 import ForgotPassword from '../components/ForgotPassword';
 import { Eye, EyeOff, Mail, Lock, Phone } from 'lucide-react';
+import { toast } from 'sonner';
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +19,6 @@ const Login: React.FC = () => {
   const {
     signIn,
     signInWithGoogle,
-    signInWithFacebook,
-    signInWithGitHub,
     user,
     isAdmin
   } = useAuth();
@@ -56,26 +55,6 @@ const Login: React.FC = () => {
       await signInWithGoogle();
     } catch (error) {
       console.error('Google login error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleFacebookLogin = async () => {
-    setLoading(true);
-    try {
-      await signInWithFacebook();
-    } catch (error) {
-      console.error('Facebook login error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleGitHubLogin = async () => {
-    setLoading(true);
-    try {
-      await signInWithGitHub();
-    } catch (error) {
-      console.error('GitHub login error:', error);
     } finally {
       setLoading(false);
     }
@@ -181,7 +160,7 @@ const Login: React.FC = () => {
 
       {/* Phone Login Modal */}
       {showPhoneLogin && <PhoneLogin onClose={() => setShowPhoneLogin(false)} />}
-
+      
       {/* Forgot Password Modal */}
       {showForgotPassword && <ForgotPassword onBack={() => setShowForgotPassword(false)} />}
     </div>;
