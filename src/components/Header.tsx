@@ -63,10 +63,10 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" className="min-h-[44px]">
+              <Button asChild variant="ghost" size="sm" className="min-h-[44px] px-6">
                 <Link to="/login">Sign In</Link>
               </Button>
-              <Button asChild variant="professional" size="sm" className="min-h-[44px]">
+              <Button asChild size="sm" className="min-h-[44px] px-6 bg-primary hover:bg-primary-hover text-primary-foreground">
                 <Link to="/register">Get Started</Link>
               </Button>
             </>
@@ -86,8 +86,8 @@ export default function Header() {
                 <Menu className="h-6 w-6" aria-hidden="true" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-sm p-0">
-              <div className="flex items-center justify-between px-4 py-6 border-b border-border/20">
+            <SheetContent side="right" className="w-full sm:max-w-sm p-0 flex flex-col">
+              <div className="flex items-center justify-between px-4 py-6 border-b border-border/20 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
                   <img className="h-8 w-auto" src={logo} alt="Satisfied Computers" />
                   <span className="font-bold text-lg text-foreground">Satisfied Computers</span>
@@ -102,7 +102,7 @@ export default function Header() {
                   <X className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </div>
-              <div className="px-4 py-6">
+              <div className="px-4 py-6 flex-1 overflow-y-auto">
                 <div className="space-y-2">
                   {navigation.map((item) => (
                     <Link
@@ -138,10 +138,10 @@ export default function Header() {
                     </>
                   ) : (
                     <>
-                      <Button asChild variant="ghost" className="w-full min-h-[48px] text-base">
+                      <Button asChild variant="outline" className="w-full min-h-[52px] text-base">
                         <Link to="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
                       </Button>
-                      <Button asChild variant="professional" className="w-full min-h-[48px] text-base">
+                      <Button asChild className="w-full min-h-[52px] text-base bg-primary hover:bg-primary-hover text-primary-foreground">
                         <Link to="/register" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
                       </Button>
                     </>

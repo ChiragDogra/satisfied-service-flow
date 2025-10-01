@@ -34,7 +34,7 @@ export default function Status() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Header />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <Card>

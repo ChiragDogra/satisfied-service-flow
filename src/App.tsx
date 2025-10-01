@@ -8,6 +8,7 @@ import { ServiceProvider } from "./contexts/ServiceContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FirebaseSetup from "./components/FirebaseSetup";
+import MobileNav from "./components/MobileNav";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CustomerDashboard from "./pages/CustomerDashboard";
@@ -80,6 +81,7 @@ const App = () => {
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <MobileNav />
           </BrowserRouter>
             </TooltipProvider>
           </AdminProvider>

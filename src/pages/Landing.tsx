@@ -62,7 +62,7 @@ const trustIndicators = [
 export default function Landing() {
   const { user, isAdmin } = useAuth();
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <Header />
       
       {/* Hero Section */}

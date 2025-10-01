@@ -128,7 +128,7 @@ export default function ServiceRequest() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
         <Header />
         <div className="flex items-center justify-center min-h-[80vh] px-4">
           <Card className="w-full max-w-md text-center">
@@ -171,7 +171,7 @@ export default function ServiceRequest() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Header />
       
       <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">

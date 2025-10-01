@@ -23,7 +23,7 @@ const AdminDashboard: React.FC = () => {
   const totalUsers = users.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Header with Hamburger Menu */}
       <Header />
 
