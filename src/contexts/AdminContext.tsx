@@ -21,6 +21,7 @@ interface AdminContextType {
   updateUserProfile: (userId: string, updates: Partial<UserProfile>) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
   getUserServiceHistory: (userId: string) => ServiceRequest[];
+  getUserServiceHistoryByPeriod: (userId: string, period: 'thisMonth' | 'thisYear' | 'all') => ServiceRequest[];
   refreshData: () => Promise<void>;
 }
 
@@ -130,6 +131,43 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return allServiceRequests.filter(request => request.userId === userId);
   };
 
+  const getUserServiceHistoryByPeriod = (userId: string, period: 'thisMonth' | 'thisYear' | 'all'): ServiceRequest[] => {
+    const userRequests = allServiceRequests.filter(request => request.userId === userId);
+    
+    if (period === 'all') {
+      return userRequests;
+    }
+
+    const now = new Date();
+    let startDate: Date;
+
+    if (period === 'thisMonth') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else { // thisYear
+      startDate = new Date(now.getFullYear(), 0, 1);
+    }
+
+    return userRequests.filter(request => {
+      try {
+        let requestDate: Date;
+        
+        if (request.createdAt && typeof request.createdAt === 'object' && 'toDate' in request.createdAt) {
+          requestDate = (request.createdAt as any).toDate();
+        } else if (typeof request.createdAt === 'string') {
+          requestDate = new Date(request.createdAt);
+        } else if (request.createdAt instanceof Date) {
+          requestDate = request.createdAt;
+        } else {
+          return false;
+        }
+        
+        return requestDate >= startDate;
+      } catch {
+        return false;
+      }
+    });
+  };
+
   const refreshData = async () => {
     setLoading(true);
     // The real-time listeners will automatically refresh the data
@@ -144,6 +182,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     updateUserProfile,
     deleteUser,
     getUserServiceHistory,
+    getUserServiceHistoryByPeriod,
     refreshData
   };
 

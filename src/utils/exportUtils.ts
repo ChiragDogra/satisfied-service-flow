@@ -117,6 +117,52 @@ const formatDateForExport = (timestamp: unknown): string => {
   }
 };
 
+// Function to export individual user's service requests with user info
+export const exportUserServiceRequestsToCSV = (
+  user: UserProfile, 
+  requests: ServiceRequest[], 
+  period: string
+): string => {
+  const headers = [
+    'User Name',
+    'User Email',
+    'User Phone',
+    'User ID',
+    'Ticket ID',
+    'Service Type',
+    'Description',
+    'Custom Service',
+    'Urgency',
+    'Preferred Date',
+    'Status',
+    'Created At',
+    'Updated At',
+    'Address'
+  ];
+
+  const csvContent = [
+    headers.join(','),
+    ...requests.map(request => [
+      `"${user.name}"`,
+      user.email,
+      user.phone || '',
+      user.uid,
+      request.id,
+      request.serviceType,
+      `"${request.description.replace(/"/g, '""')}"`,
+      request.customService ? `"${request.customService}"` : '',
+      request.urgency,
+      request.preferredDate,
+      request.status,
+      formatDateForExport(request.createdAt),
+      formatDateForExport(request.updatedAt),
+      `"${request.address}"`
+    ].join(','))
+  ].join('\n');
+
+  return csvContent;
+};
+
 // Function to get service statistics
 export const getServiceStatistics = (requests: ServiceRequest[]) => {
   const total = requests.length;

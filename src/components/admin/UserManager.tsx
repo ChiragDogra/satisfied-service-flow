@@ -10,6 +10,7 @@ import { useAdmin } from '../../contexts/AdminContext';
 import { UserProfile } from '../../types/UserProfile';
 import { ServiceRequest } from '../../contexts/ServiceContext';
 import { exportUsersToCSV, downloadCSV } from '../../utils/exportUtils';
+import UserDetailView from './UserDetailView';
 import { 
   Search, 
   Download, 
@@ -21,7 +22,8 @@ import {
   Phone,
   MapPin,
   Calendar,
-  History
+  History,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,6 +33,7 @@ const UserManager: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<UserProfile | null>(null);
 
   // Filter users based on search
@@ -93,6 +96,11 @@ const UserManager: React.FC = () => {
       console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
     }
+  };
+
+  const handleOpenUserDetail = (user: UserProfile) => {
+    setSelectedUser(user);
+    setIsUserDetailOpen(true);
   };
 
   const formatDate = (timestamp: unknown): string => {
@@ -233,12 +241,22 @@ const UserManager: React.FC = () => {
                         <TableCell className="text-sm">{formatDate(user.createdAt)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenUserDetail(user)}
+                              title="Detailed Analysis"
+                            >
+                              <BarChart3 className="w-4 h-4" />
+                            </Button>
+                            
                             <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
                               <DialogTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => setSelectedUser(user)}
+                                  title="Quick View"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
@@ -471,6 +489,18 @@ const UserManager: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* User Detail Analysis View */}
+      {selectedUser && (
+        <UserDetailView
+          user={selectedUser}
+          isOpen={isUserDetailOpen}
+          onClose={() => {
+            setIsUserDetailOpen(false);
+            setSelectedUser(null);
+          }}
+        />
+      )}
     </div>
   );
 };
