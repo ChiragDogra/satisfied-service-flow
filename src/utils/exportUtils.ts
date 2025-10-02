@@ -117,6 +117,37 @@ const formatDateForExport = (timestamp: unknown): string => {
   }
 };
 
+// Helper function to format dates for display
+export const formatDateForDisplay = (timestamp: unknown): string => {
+  if (!timestamp) return 'Unknown';
+  
+  try {
+    let date: Date | null = null;
+    
+    // Handle Firestore timestamp
+    if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+      date = (timestamp as any).toDate();
+    }
+    // Handle string dates
+    else if (typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    }
+    // Handle Date objects
+    else if (timestamp instanceof Date) {
+      date = timestamp;
+    }
+    
+    if (date && !isNaN(date.getTime())) {
+      return date.toLocaleString();
+    }
+    
+    return 'Invalid Date';
+  } catch (error) {
+    console.error('Error formatting date for display:', error);
+    return 'Invalid Date';
+  }
+};
+
 // Function to export individual user's service requests with user info
 export const exportUserServiceRequestsToCSV = (
   user: UserProfile, 

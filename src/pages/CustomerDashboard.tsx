@@ -1,13 +1,14 @@
 import React, { useMemo, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { useService } from '../contexts/ServiceContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { User, Mail, Phone, Calendar, Plus, History, Settings, MessageCircle, ChevronRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Plus, FileText, Calendar, MapPin, Phone, Mail, User, History, Settings, MessageCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useService } from '@/contexts/ServiceContext';
-import Header from '@/components/Header';
-import EmailVerification from '@/components/EmailVerification';
+import Header from '../components/Header';
+import EmailVerification from '../components/EmailVerification';
+import { formatDateForDisplay } from '../utils/exportUtils';
 const CustomerDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const { requests } = useService();
@@ -15,7 +16,23 @@ const CustomerDashboard: React.FC = () => {
   
   const myRequests = useMemo(() => {
     if (!user?.uid) return [] as any[];
-    return requests.filter(r => r.userId === user.uid).sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+    return requests.filter(r => r.userId === user.uid).sort((a, b) => {
+      // Handle different timestamp formats for sorting
+      const getTimestamp = (timestamp: unknown): number => {
+        if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+          return (timestamp as any).toDate().getTime();
+        }
+        if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+          return new Date(timestamp).getTime();
+        }
+        if (timestamp instanceof Date) {
+          return timestamp.getTime();
+        }
+        return 0;
+      };
+      
+      return getTimestamp(b.createdAt) - getTimestamp(a.createdAt);
+    });
   }, [requests, user?.uid]);
 
   const getStatusColor = (status: string) => {
@@ -154,7 +171,7 @@ const CustomerDashboard: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Member Since</p>
                     <p className="font-medium">
-                      {new Date(userProfile.createdAt as string).toLocaleDateString()}
+                      {formatDateForDisplay(userProfile.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -188,7 +205,7 @@ const CustomerDashboard: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{r.serviceType}</p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(r.createdAt as string).toLocaleDateString()}
+                          {formatDateForDisplay(r.createdAt)}
                         </p>
                       </div>
                       <Badge className={getStatusColor(r.status)}>
@@ -244,7 +261,7 @@ const CustomerDashboard: React.FC = () => {
                           Request ID: {r.id}
                         </p>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Submitted on {new Date(r.createdAt as string).toLocaleString()}
+                          Submitted on {formatDateForDisplay(r.createdAt)}
                         </p>
                         <p className="text-sm">{r.description}</p>
                       </div>
@@ -259,4 +276,5 @@ const CustomerDashboard: React.FC = () => {
     </div>
   );
 };
+
 export default CustomerDashboard;

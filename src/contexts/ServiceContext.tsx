@@ -35,6 +35,7 @@ interface ServiceContextType {
   addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
   getRequestsByContact: (emailOrPhone: string) => Promise<ServiceRequest[]>;
+  getRequestsByUserId: (userId: string) => ServiceRequest[];
   getRequestById: (id: string) => Promise<ServiceRequest | undefined>;
   loading: boolean;
 }
@@ -214,6 +215,10 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getRequestsByUserId = (userId: string) => {
+    return requests.filter(req => req.userId === userId);
+  };
+
   const getRequestById = async (id: string) => {
     // First try to find in current requests
     const found = requests.find(req => req.id === id);
@@ -241,6 +246,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     addRequest,
     updateRequestStatus,
     getRequestsByContact,
+    getRequestsByUserId,
     getRequestById,
     loading
   };
