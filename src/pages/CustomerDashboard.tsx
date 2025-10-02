@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useService } from '../contexts/ServiceContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -8,11 +8,13 @@ import { Plus, FileText, Calendar, MapPin, Phone, Mail, User, History, Settings,
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import EmailVerification from '../components/EmailVerification';
+import ProfileSettings from '../components/ProfileSettings';
 import { formatDateForDisplay } from '../utils/exportUtils';
 const CustomerDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const { requests } = useService();
   const historyRef = useRef<HTMLDivElement | null>(null);
+  const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
   
   const myRequests = useMemo(() => {
     if (!user?.uid) return [] as any[];
@@ -116,7 +118,11 @@ const CustomerDashboard: React.FC = () => {
               <History className="w-6 h-6" />
               <span>View History</span>
             </Button>
-            <Button variant="outline" className="h-auto p-4 flex-col space-y-2">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex-col space-y-2"
+              onClick={() => setIsProfileSettingsOpen(true)}
+            >
               <Settings className="w-6 h-6" />
               <span>Settings</span>
             </Button>
@@ -273,6 +279,12 @@ const CustomerDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* Profile Settings Dialog */}
+      <ProfileSettings 
+        isOpen={isProfileSettingsOpen} 
+        onClose={() => setIsProfileSettingsOpen(false)} 
+      />
     </div>
   );
 };

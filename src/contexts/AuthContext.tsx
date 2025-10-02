@@ -56,6 +56,7 @@ interface AuthContextType {
   checkEmailVerified: () => Promise<boolean>;
   isEmailVerified: boolean;
   resendVerificationEmail: () => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -611,6 +612,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return sendVerificationEmailInternal();
   };
 
+  // Update user profile
+  const updateUserProfile = async (profileData: Partial<UserProfile>): Promise<void> => {
+    if (!user?.uid) {
+      throw new Error('No user is currently signed in');
+    }
+
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      
+      // Prepare the update data with timestamp
+      const updateData = {
+        ...profileData,
+        updatedAt: serverTimestamp()
+      };
+
+      // Update the document in Firestore
+      await setDoc(userDocRef, updateData, { merge: true });
+
+      // Update the local userProfile state
+      setUserProfile(prev => prev ? { ...prev, ...profileData } : null);
+      
+      console.log('User profile updated successfully');
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -626,6 +655,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     checkEmailVerified,
     isEmailVerified: user?.emailVerified || false,
     resendVerificationEmail,
+    updateUserProfile,
     isAdmin
   };
 
