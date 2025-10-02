@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useService, ServiceRequest } from '@/contexts/ServiceContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { Search, Filter, Calendar, User, Mail, Phone, MapPin, Clock, AlertCircle, Package } from 'lucide-react';
 
 export default function Status() {
   const { requests, getRequestsByContact, getRequestById, getRequestsByUserId, loading } = useService();
@@ -131,50 +133,113 @@ export default function Status() {
     setError('');
   };
 
+  // Helper to get status variant
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'Completed': return 'default';
+      case 'In Progress': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
   // Helper function to render service request cards
   const renderServiceRequest = (r: ServiceRequest) => (
-    <div key={r.id} className="rounded-md border p-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <div className="font-semibold">{r.id}</div>
-          <div className="text-sm text-muted-foreground">{r.customerName} • {r.serviceType}</div>
-          {isAdmin && (
-            <div className="text-sm text-muted-foreground">{r.email} • {r.phone}</div>
-          )}
+    <Card key={r.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in border-border/50">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div className="flex-1 space-y-3">
+            {/* Ticket ID */}
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-primary" />
+              <span className="font-mono font-bold text-lg text-foreground">{r.id}</span>
+            </div>
+            
+            {/* Customer Info */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-foreground">{r.customerName}</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground">{r.serviceType}</span>
+              </div>
+              
+              {isAdmin && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span>{r.email}</span>
+                  </div>
+                  <span className="hidden sm:inline">•</span>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    <span>{r.phone}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Date */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              {(() => {
+                let created: Date | null = null;
+                if (r?.createdAt && typeof r.createdAt === 'object' && 'toDate' in r.createdAt) {
+                  try { created = (r.createdAt as any).toDate(); } catch {}
+                } else if (typeof r?.createdAt === 'string' || typeof r?.createdAt === 'number') {
+                  try { created = new Date(r.createdAt); } catch {}
+                }
+                return (
+                  <span>
+                    Submitted {created ? created.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'Unknown'}
+                  </span>
+                );
+              })()}
+            </div>
+
+            {/* Description */}
+            <div className="pt-2 border-t border-border/50">
+              <p className="text-sm text-foreground/80 line-clamp-2">{r.description}</p>
+            </div>
+
+            {/* Admin Details */}
+            {isAdmin && (
+              <div className="pt-2 space-y-2 text-sm">
+                <div className="flex items-start gap-2 text-muted-foreground">
+                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span className="line-clamp-1">{r.address}</span>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Urgency: <span className="font-medium text-foreground">{r.urgency}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>Preferred: <span className="font-medium text-foreground">{r.preferredDate}</span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex sm:flex-col items-start gap-2">
+            <Badge 
+              variant={getStatusVariant(r.status)}
+              className="text-xs font-semibold px-3 py-1 whitespace-nowrap"
+            >
+              {r.status}
+            </Badge>
+          </div>
         </div>
-        <div className="text-sm">
-          <span className={`px-2 py-1 rounded text-white ${
-            r.status === 'Completed' ? 'bg-green-600' :
-            r.status === 'In Progress' ? 'bg-blue-600' : 'bg-yellow-600'
-          }`}>
-            {r.status}
-          </span>
-        </div>
-      </div>
-      <div className="mt-2 text-sm text-muted-foreground">
-        {(() => {
-          let created: Date | null = null;
-          if (r?.createdAt && typeof r.createdAt === 'object' && 'toDate' in r.createdAt) {
-            try { created = (r.createdAt as any).toDate(); } catch {}
-          } else if (typeof r?.createdAt === 'string' || typeof r?.createdAt === 'number') {
-            try { created = new Date(r.createdAt); } catch {}
-          }
-          return (
-            <span>
-              Submitted on {created ? created.toLocaleString() : 'Unknown'}
-            </span>
-          );
-        })()}
-      </div>
-      <div className="mt-2 text-sm">{r.description}</div>
-      {isAdmin && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          <div>Address: {r.address}</div>
-          <div>Urgency: {r.urgency}</div>
-          <div>Preferred Date: {r.preferredDate}</div>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 
   if (loading) {
@@ -193,77 +258,128 @@ export default function Status() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-20 lg:pb-0">
       <Header />
-      <div className={`mx-auto px-4 sm:px-6 py-8 sm:py-12 ${isAdmin ? 'max-w-6xl' : 'max-w-3xl'}`}>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isAdmin ? 'Service Status Management' : 'Your Service Requests'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Regular User View */}
-            {!isAdmin && user && (
-              <div>
-                {userRequests.length > 0 ? (
-                  <div className="space-y-3">
-                    {userRequests.map(renderServiceRequest)}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    You don't have any service requests yet. 
-                    <br />
-                    <a href="/request" className="text-primary hover:underline">Submit a new request</a> to get started.
-                  </p>
-                )}
-              </div>
-            )}
+      <div className={`mx-auto px-4 sm:px-6 py-8 sm:py-12 ${isAdmin ? 'max-w-7xl' : 'max-w-4xl'}`}>
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            {isAdmin ? 'Service Status Management' : 'Your Service Requests'}
+          </h1>
+          <p className="text-muted-foreground">
+            {isAdmin 
+              ? 'Manage and track all customer service requests' 
+              : 'Track the status of your service requests'}
+          </p>
+        </div>
 
-            {/* Guest User View */}
-            {!isAdmin && !user && (
-              <div>
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                  <div>
-                    <Label htmlFor="query">Ticket ID, Email, or Phone</Label>
-                    <Input
-                      id="query"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="e.g., SC-004 or you@example.com or +1-555-1234"
-                      className="min-h-[44px]"
-                    />
+        <div className="space-y-6">
+          {/* Regular User View */}
+          {!isAdmin && user && (
+            <div>
+              {userRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {userRequests.map(renderServiceRequest)}
+                </div>
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                    <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No service requests yet</h3>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Get started by submitting your first service request
+                    </p>
+                    <Button asChild>
+                      <a href="/request">Submit New Request</a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* Guest User View */}
+          {!isAdmin && !user && (
+            <Card className="animate-fade-in">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Track Your Service Request
+                </CardTitle>
+                <CardDescription>
+                  Enter your ticket ID, email, or phone number to view your service status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="query" className="sr-only">Search</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="query"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        placeholder="SC-004 or email@example.com or +1-555-1234"
+                        className="pl-10 h-11"
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-end">
-                    <Button onClick={handleSearch} className="w-full sm:w-auto min-h-[44px]">Search</Button>
-                  </div>
+                  <Button onClick={handleSearch} size="lg" className="sm:w-auto">
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
                 </div>
 
-                {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+                {error && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    <p>{error}</p>
+                  </div>
+                )}
 
-                <div className="mt-6 space-y-3">
-                  {results.map(renderServiceRequest)}
-                  {results.length === 0 && !error && (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      Enter your ticket ID, email, or phone number to view your service status.
-                      <br />
-                      <a href="/login" className="text-primary hover:underline">Sign in</a> to automatically view all your requests.
-                    </p>
+                <div className="space-y-4">
+                  {results.length > 0 ? (
+                    results.map(renderServiceRequest)
+                  ) : !error && (
+                    <div className="text-center py-8 px-4">
+                      <Package className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Enter your details above to track your service request
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <a href="/login" className="text-primary hover:underline font-medium">Sign in</a> to automatically view all your requests
+                      </p>
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Admin View */}
-            {isAdmin && (
-              <div>
-                {/* Admin Filters */}
-                <div className="mb-6 p-4 bg-muted rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="filterUser">Filter by Customer</Label>
+          {/* Admin View */}
+          {isAdmin && (
+            <div className="space-y-6">
+              {/* Admin Filters */}
+              <Card className="animate-fade-in">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="h-5 w-5" />
+                    Filters & Search
+                  </CardTitle>
+                  <CardDescription>
+                    Filter and search through all service requests
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="filterUser" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Customer
+                      </Label>
                       <Select value={filterUser} onValueChange={setFilterUser}>
-                        <SelectTrigger>
+                        <SelectTrigger id="filterUser">
                           <SelectValue placeholder="All customers" />
                         </SelectTrigger>
                         <SelectContent>
@@ -275,10 +391,13 @@ export default function Status() {
                       </Select>
                     </div>
 
-                    <div>
-                      <Label htmlFor="filterEmail">Filter by Email</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="filterEmail" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Label>
                       <Select value={filterEmail} onValueChange={setFilterEmail}>
-                        <SelectTrigger>
+                        <SelectTrigger id="filterEmail">
                           <SelectValue placeholder="All emails" />
                         </SelectTrigger>
                         <SelectContent>
@@ -290,10 +409,13 @@ export default function Status() {
                       </Select>
                     </div>
 
-                    <div>
-                      <Label htmlFor="filterStatus">Filter by Status</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="filterStatus" className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Status
+                      </Label>
                       <Select value={filterStatus} onValueChange={setFilterStatus}>
-                        <SelectTrigger>
+                        <SelectTrigger id="filterStatus">
                           <SelectValue placeholder="All statuses" />
                         </SelectTrigger>
                         <SelectContent>
@@ -305,79 +427,118 @@ export default function Status() {
                       </Select>
                     </div>
 
-                    <div>
-                      <Label htmlFor="filterDateFrom">From Date</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="filterDateFrom" className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        From Date
+                      </Label>
                       <Input
                         id="filterDateFrom"
                         type="date"
                         value={filterDateFrom}
                         onChange={(e) => setFilterDateFrom(e.target.value)}
+                        className="h-10"
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="filterDateTo">To Date</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="filterDateTo" className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        To Date
+                      </Label>
                       <Input
                         id="filterDateTo"
                         type="date"
                         value={filterDateTo}
                         onChange={(e) => setFilterDateTo(e.target.value)}
+                        className="h-10"
                       />
                     </div>
 
                     <div className="flex items-end">
-                      <Button onClick={clearFilters} variant="outline" className="w-full">
-                        Clear Filters
+                      <Button onClick={clearFilters} variant="outline" className="w-full h-10">
+                        Clear All
                       </Button>
                     </div>
                   </div>
 
                   {/* Manual Search for Admin */}
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                    <div>
-                      <Label htmlFor="adminQuery">Manual Search (Ticket ID, Email, Phone)</Label>
-                      <Input
-                        id="adminQuery"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="e.g., SC-004 or customer@email.com"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button onClick={handleSearch} className="w-full sm:w-auto">Search</Button>
+                  <div className="pt-6 border-t border-border">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor="adminQuery" className="flex items-center gap-2">
+                          <Search className="h-4 w-4" />
+                          Manual Search
+                        </Label>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="adminQuery"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            placeholder="Ticket ID, email, or phone"
+                            className="pl-10 h-10"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-end">
+                        <Button onClick={handleSearch} className="w-full sm:w-auto h-10">
+                          <Search className="h-4 w-4 mr-2" />
+                          Search
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {error && <p className="text-sm text-destructive mb-3">{error}</p>}
-
-                {/* Results Display */}
-                <div className="space-y-3">
-                  {query && results.length > 0 ? (
-                    // Show search results when admin has searched
-                    results.map(renderServiceRequest)
-                  ) : (
-                    // Show filtered results when no search query
-                    <>
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">
-                          All Service Requests ({filteredAdminRequests.length})
-                        </h3>
-                      </div>
-                      {filteredAdminRequests.length > 0 ? (
-                        filteredAdminRequests.map(renderServiceRequest)
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-8">
-                          No service requests found matching the current filters.
-                        </p>
-                      )}
-                    </>
-                  )}
+              {error && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm animate-fade-in">
+                  <AlertCircle className="h-4 w-4" />
+                  <p>{error}</p>
                 </div>
+              )}
+
+              {/* Results Display */}
+              <div className="space-y-4">
+                {query && results.length > 0 ? (
+                  // Show search results when admin has searched
+                  <>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold">Search Results</h2>
+                      <Badge variant="secondary">{results.length} found</Badge>
+                    </div>
+                    {results.map(renderServiceRequest)}
+                  </>
+                ) : (
+                  // Show filtered results when no search query
+                  <>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <h2 className="text-xl font-semibold">All Service Requests</h2>
+                      <Badge variant="secondary" className="w-fit">
+                        {filteredAdminRequests.length} {filteredAdminRequests.length === 1 ? 'request' : 'requests'}
+                      </Badge>
+                    </div>
+                    {filteredAdminRequests.length > 0 ? (
+                      filteredAdminRequests.map(renderServiceRequest)
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                          <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                          <h3 className="text-lg font-semibold mb-2">No requests found</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Try adjusting your filters or search criteria
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
