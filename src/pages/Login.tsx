@@ -87,7 +87,7 @@ const Login: React.FC = () => {
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input id="email" type="email" placeholder="admin@satisfiedcomputers.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} className="pl-10" required />
+                  <Input id="email" type="email" placeholder="Enter your email address" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} className="pl-10" required />
                 </div>
               </div>
               
