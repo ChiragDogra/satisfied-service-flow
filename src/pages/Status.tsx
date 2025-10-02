@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useService, ServiceRequest } from '@/contexts/ServiceContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Filter, Calendar, User, Mail, Phone, MapPin, Clock, AlertCircle, Package } from 'lucide-react';
+import EstimateEditor from '@/components/admin/EstimateEditor';
+import { Search, Filter, Calendar, User, Mail, Phone, MapPin, Clock, AlertCircle, Package, DollarSign, Calculator } from 'lucide-react';
 
 export default function Status() {
   const { requests, getRequestsByContact, getRequestById, getRequestsByUserId, loading } = useService();
@@ -30,6 +31,8 @@ export default function Status() {
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [semanticSearch, setSemanticSearch] = useState('');
+  const [isEstimateEditorOpen, setIsEstimateEditorOpen] = useState(false);
+  const [estimateRequest, setEstimateRequest] = useState<ServiceRequest | null>(null);
 
   // Load user's requests automatically when logged in (non-admin)
   useEffect(() => {
@@ -181,6 +184,11 @@ export default function Status() {
     setError('');
   };
 
+  const handleEditEstimates = (request: ServiceRequest) => {
+    setEstimateRequest(request);
+    setIsEstimateEditorOpen(true);
+  };
+
   // Helper to get status variant
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -255,6 +263,48 @@ export default function Status() {
               <p className="text-sm text-foreground/80 line-clamp-2">{r.description}</p>
             </div>
 
+            {/* Service Details (visible to all users) */}
+            {(r.estimatedPrice || r.estimatedCompletionTime || r.diagnosedIssue) && (
+              <div className="pt-2 border-t border-border/50">
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    {r.estimatedPrice && (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <DollarSign className="h-4 w-4" />
+                        <span className="font-medium">Estimated Cost: ₹{r.estimatedPrice.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {r.estimatedCompletionTime && (
+                      <div className="flex items-center gap-2 text-blue-600">
+                        <Clock className="h-4 w-4" />
+                        <span className="font-medium">
+                          Completion: {
+                            r.estimatedCompletionTime.includes('T') ? 
+                              new Date(r.estimatedCompletionTime).toLocaleString('en-IN', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short'
+                              }) : 
+                              r.estimatedCompletionTime
+                          }
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {r.diagnosedIssue && (
+                    <div className="text-sm">
+                      <div className="flex items-start gap-2 text-orange-600">
+                        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-medium">Diagnosed Issue:</span>
+                          <p className="text-foreground/80 mt-1">{r.diagnosedIssue}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Admin Details */}
             {isAdmin && (
               <div className="pt-2 space-y-2 text-sm">
@@ -276,7 +326,7 @@ export default function Status() {
             )}
           </div>
 
-          {/* Status Badge */}
+          {/* Status Badge & Admin Actions */}
           <div className="flex sm:flex-col items-start gap-2">
             <Badge 
               variant={getStatusVariant(r.status)}
@@ -284,6 +334,17 @@ export default function Status() {
             >
               {r.status}
             </Badge>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEditEstimates(r)}
+                className="h-7 px-2"
+                title="Edit Service Details"
+              >
+                <Calculator className="w-3 h-3" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -588,6 +649,13 @@ export default function Status() {
           )}
         </div>
       </div>
+
+      {/* Estimate Editor Dialog */}
+      <EstimateEditor
+        isOpen={isEstimateEditorOpen}
+        onClose={() => setIsEstimateEditorOpen(false)}
+        request={estimateRequest}
+      />
     </div>
   );
 }

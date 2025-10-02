@@ -26,6 +26,9 @@ export interface ServiceRequest {
   urgency: 'Low' | 'Medium' | 'High';
   preferredDate: string;
   status: 'Pending' | 'In Progress' | 'Completed';
+  estimatedPrice?: number;
+  estimatedCompletionTime?: string; // ISO date string or description like "2-3 days"
+  diagnosedIssue?: string;
   createdAt: unknown; // Firestore timestamp
   updatedAt: unknown; // Firestore timestamp
 }
@@ -34,6 +37,7 @@ interface ServiceContextType {
   requests: ServiceRequest[];
   addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
+  updateRequestEstimates: (id: string, estimates: { estimatedPrice?: number; estimatedCompletionTime?: string; diagnosedIssue?: string }) => Promise<void>;
   getRequestsByContact: (emailOrPhone: string) => Promise<ServiceRequest[]>;
   getRequestsByUserId: (userId: string) => ServiceRequest[];
   getRequestById: (id: string) => Promise<ServiceRequest | undefined>;
@@ -179,6 +183,35 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateRequestEstimates = async (id: string, estimates: { estimatedPrice?: number; estimatedCompletionTime?: string; diagnosedIssue?: string }) => {
+    if (!db) {
+      throw new Error('Firebase not initialized');
+    }
+
+    try {
+      const updateData: any = {
+        updatedAt: serverTimestamp()
+      };
+
+      if (estimates.estimatedPrice !== undefined) {
+        updateData.estimatedPrice = estimates.estimatedPrice;
+      }
+
+      if (estimates.estimatedCompletionTime !== undefined) {
+        updateData.estimatedCompletionTime = estimates.estimatedCompletionTime;
+      }
+
+      if (estimates.diagnosedIssue !== undefined) {
+        updateData.diagnosedIssue = estimates.diagnosedIssue;
+      }
+
+      await updateDoc(doc(db, 'serviceRequests', id), updateData);
+    } catch (error) {
+      console.error('Error updating service request estimates:', error);
+      throw error;
+    }
+  };
+
   const getRequestsByContact = async (emailOrPhone: string) => {
     if (!db) {
       return [];
@@ -245,6 +278,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     requests,
     addRequest,
     updateRequestStatus,
+    updateRequestEstimates,
     getRequestsByContact,
     getRequestsByUserId,
     getRequestById,

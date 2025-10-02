@@ -12,6 +12,7 @@ import { useService } from '../../contexts/ServiceContext';
 import { useAdmin } from '../../contexts/AdminContext';
 import { ServiceRequest } from '../../contexts/ServiceContext';
 import { exportServiceRequestsToCSV, downloadCSV } from '../../utils/exportUtils';
+import EstimateEditor from './EstimateEditor';
 import { 
   Search, 
   Filter, 
@@ -24,7 +25,8 @@ import {
   Calendar,
   Phone,
   Mail,
-  MapPin
+  MapPin,
+  Calculator
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,6 +38,8 @@ const ServiceRequestsManager: React.FC = () => {
   const [serviceTypeFilter, setServiceTypeFilter] = useState<string>('all');
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEstimateEditorOpen, setIsEstimateEditorOpen] = useState(false);
+  const [estimateRequest, setEstimateRequest] = useState<ServiceRequest | null>(null);
 
   // Filter requests based on search and filters
   const filteredRequests = allServiceRequests.filter(request => {
@@ -71,6 +75,11 @@ const ServiceRequestsManager: React.FC = () => {
       console.error('Export error:', error);
       toast.error('Failed to export service requests');
     }
+  };
+
+  const handleEditEstimates = (request: ServiceRequest) => {
+    setEstimateRequest(request);
+    setIsEstimateEditorOpen(true);
   };
 
   const getStatusBadge = (status: ServiceRequest['status']) => {
@@ -356,6 +365,15 @@ const ServiceRequestsManager: React.FC = () => {
                             </DialogContent>
                           </Dialog>
                           
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditEstimates(request)}
+                            title="Edit Estimates"
+                          >
+                            <Calculator className="w-4 h-4" />
+                          </Button>
+                          
                           <Select
                             value={request.status}
                             onValueChange={(value) => handleStatusUpdate(request.id, value as ServiceRequest['status'])}
@@ -379,6 +397,13 @@ const ServiceRequestsManager: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Estimate Editor Dialog */}
+      <EstimateEditor
+        isOpen={isEstimateEditorOpen}
+        onClose={() => setIsEstimateEditorOpen(false)}
+        request={estimateRequest}
+      />
     </div>
   );
 };
