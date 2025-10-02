@@ -406,62 +406,26 @@ export default function Status() {
             </div>
           )}
 
-          {/* Guest User View */}
+          {/* Guest User View - Login Required */}
           {!isAdmin && !user && (
-            <Card className="animate-fade-in">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Track Your Service Request
-                </CardTitle>
-                <CardDescription>
-                  Enter your ticket ID, email, or phone number to view your service status
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <Card className="animate-fade-in border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <User className="h-16 w-16 text-muted-foreground/50 mb-6" />
+                <h3 className="text-xl font-semibold mb-3">Login Required</h3>
+                <p className="text-muted-foreground mb-6 max-w-md">
+                  Please sign in to view your service requests. This ensures the security and privacy of your service information.
+                </p>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor="query" className="sr-only">Search</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="query"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="SC-004 or email@example.com or +1-555-1234"
-                        className="pl-10 h-11"
-                      />
-                    </div>
-                  </div>
-                  <Button onClick={handleSearch} size="lg" className="sm:w-auto">
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
+                  <Button asChild size="lg">
+                    <a href="/login">Sign In</a>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <a href="/register">Create Account</a>
                   </Button>
                 </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    <p>{error}</p>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {results.length > 0 ? (
-                    results.map(renderServiceRequest)
-                  ) : !error && (
-                    <div className="text-center py-8 px-4">
-                      <Package className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Enter your details above to track your service request
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        <a href="/login" className="text-primary hover:underline font-medium">Sign in</a> to automatically view all your requests
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <p className="text-xs text-muted-foreground mt-6">
+                  Don't have an account? Registration is quick and secure.
+                </p>
               </CardContent>
             </Card>
           )}

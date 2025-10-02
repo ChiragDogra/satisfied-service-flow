@@ -48,7 +48,11 @@ export default function ServiceRequest() {
     if (!formData.customerName.trim()) newErrors.customerName = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service type';
     if (!formData.description.trim()) newErrors.description = 'Service description is required';
@@ -261,13 +265,13 @@ export default function ServiceRequest() {
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="e.g., +91 9876543210 or 9876543210"
                         className={`min-h-[44px] text-base ${errors.phone ? 'border-destructive' : ''}`}
                       />
                       {errors.phone && (
                         <p className="text-sm text-destructive mt-1">{errors.phone}</p>
                       )}
                     </div>
-                    
                     <div>
                       <Label htmlFor="preferredDate" className="text-sm sm:text-base">Preferred Date *</Label>
                       <Input
