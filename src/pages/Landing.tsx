@@ -16,7 +16,8 @@ import {
   Clock,
   Phone,
   Mail,
-  MapPin
+  MapPin,
+  MessageCircle
 } from 'lucide-react';
 
 const services = [
@@ -175,14 +176,23 @@ export default function Landing() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-center p-3 sm:p-4">
               <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 items-center justify-center rounded-lg bg-primary/10 mb-3 sm:mb-4">
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Call Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">(555) 123-TECH</p>
+              <p className="text-muted-foreground text-sm sm:text-base font-medium">+91 9634409988</p>
               <p className="text-xs sm:text-sm text-muted-foreground">Mon-Fri: 8AM-6PM</p>
+            </div>
+
+            <div className="text-center p-3 sm:p-4">
+              <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 items-center justify-center rounded-lg bg-green-100 mb-3 sm:mb-4">
+                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold mb-2">WhatsApp</h3>
+              <p className="text-muted-foreground text-sm sm:text-base font-medium">+91 9634409988</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Quick Support</p>
             </div>
             
             <div className="text-center p-3 sm:p-4">
@@ -190,7 +200,7 @@ export default function Landing() {
                 <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Email Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium break-all">service@satisfiedcomputers.com</p>
+              <p className="text-muted-foreground text-sm sm:text-base font-medium break-all">satisfiedcomputers@gmail.com</p>
               <p className="text-xs sm:text-sm text-muted-foreground">24hr response time</p>
             </div>
             
@@ -199,8 +209,8 @@ export default function Landing() {
                 <MapPin className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Visit Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">123 Tech Street</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">City, State 12345</p>
+              <p className="text-muted-foreground text-sm sm:text-base font-medium">Transport Nagar</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Saharanpur</p>
             </div>
           </div>
         </div>
@@ -232,9 +242,10 @@ export default function Landing() {
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Info</h3>
               <div className="space-y-1.5 sm:space-y-2 text-background/70 text-sm sm:text-base">
-                <p>Phone: (555) 123-TECH</p>
-                <p className="break-all">Email: service@satisfiedcomputers.com</p>
-                <p>Address: 123 Tech Street, City, State 12345</p>
+                <p>Phone: +91 9634409988</p>
+                <p>WhatsApp: +91 9634409988</p>
+                <p className="break-all">Email: satisfiedcomputers@gmail.com</p>
+                <p>Address: Transport Nagar, Saharanpur</p>
                 <p>Hours: Mon-Fri 8AM-6PM, Sat 9AM-4PM</p>
               </div>
             </div>
@@ -242,7 +253,6 @@ export default function Landing() {
           
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-background/20 text-center">
             <p className="text-background/70 text-sm sm:text-base">
-              © 2024 Satisfied Computers. All rights reserved. | Licensed & Insured IT Services
             </p>
           </div>
         </div>

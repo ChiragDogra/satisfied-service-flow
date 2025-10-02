@@ -146,6 +146,7 @@ export const getPasswordResetEmailTemplate = (email: string): EmailTemplate => {
         <h2>Reset Your Password</h2>
         <p>Hello,</p>
         <p>We received a request to reset the password for your Satisfied Computers account (<strong>${email}</strong>).</p>
+        <p>If you have any questions, contact us at <strong>+91 9634409988</strong> or <strong>satisfiedcomputers@gmail.com</strong></p>
         <p style="margin: 20px 0;">Click the link below to choose a new password:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="{%RESET_LINK%}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
@@ -171,6 +172,7 @@ export const getEmailVerificationTemplate = (): EmailTemplate => {
         <h2>Verify Your Email Address</h2>
         <p>Hello,</p>
         <p>Thank you for creating an account with Satisfied Computers. Please verify your email address to access all features.</p>
+        <p>If you have any questions, contact us at <strong>+91 9634409988</strong> or <strong>satisfiedcomputers@gmail.com</strong></p>
         <p style="margin: 20px 0;">Click the button below to verify your email address:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="{%VERIFICATION_LINK%}" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
