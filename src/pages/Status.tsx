@@ -26,8 +26,10 @@ export default function Status() {
   const [filterUser, setFilterUser] = useState('__all__');
   const [filterEmail, setFilterEmail] = useState('__all__');
   const [filterStatus, setFilterStatus] = useState('__all__');
+  const [filterServiceType, setFilterServiceType] = useState('__all__');
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
+  const [semanticSearch, setSemanticSearch] = useState('');
 
   // Load user's requests automatically when logged in (non-admin)
   useEffect(() => {
@@ -54,10 +56,50 @@ export default function Status() {
     return Array.from(emails).sort();
   }, [requests]);
 
-  // Filter admin requests based on selected filters
+  const uniqueServiceTypes = useMemo(() => {
+    const types = new Set<string>();
+    requests.forEach(req => {
+      if (req.serviceType) types.add(req.serviceType);
+    });
+    return Array.from(types).sort();
+  }, [requests]);
+
+  // Filter admin requests based on selected filters and semantic search
   const filteredAdminRequests = useMemo(() => {
     let filtered = [...requests];
 
+    // Apply semantic search first if provided
+    if (semanticSearch.trim()) {
+      const searchTerm = semanticSearch.toLowerCase().trim();
+      filtered = filtered.filter(req => {
+        // Search through all relevant fields
+        const searchableFields = [
+          req.id,
+          req.customerName,
+          req.email,
+          req.phone,
+          req.serviceType,
+          req.status,
+          req.description,
+          req.address,
+          req.urgency,
+          req.preferredDate
+        ].filter(Boolean).map(field => field.toString().toLowerCase());
+
+        // Also search in formatted date
+        let dateString = '';
+        if (req?.createdAt && typeof req.createdAt === 'object' && 'toDate' in req.createdAt) {
+          try { dateString = (req.createdAt as any).toDate().toLocaleDateString(); } catch {}
+        } else if (typeof req?.createdAt === 'string' || typeof req?.createdAt === 'number') {
+          try { dateString = new Date(req.createdAt).toLocaleDateString(); } catch {}
+        }
+        if (dateString) searchableFields.push(dateString);
+
+        return searchableFields.some(field => field.includes(searchTerm));
+      });
+    }
+
+    // Apply dropdown filters
     if (filterUser && filterUser !== '__all__') {
       filtered = filtered.filter(req => 
         req.customerName.toLowerCase().includes(filterUser.toLowerCase())
@@ -72,6 +114,10 @@ export default function Status() {
 
     if (filterStatus && filterStatus !== '__all__') {
       filtered = filtered.filter(req => req.status === filterStatus);
+    }
+
+    if (filterServiceType && filterServiceType !== '__all__') {
+      filtered = filtered.filter(req => req.serviceType === filterServiceType);
     }
 
     if (filterDateFrom) {
@@ -99,7 +145,7 @@ export default function Status() {
     }
 
     return filtered;
-  }, [requests, filterUser, filterEmail, filterStatus, filterDateFrom, filterDateTo]);
+  }, [requests, filterUser, filterEmail, filterStatus, filterServiceType, filterDateFrom, filterDateTo, semanticSearch]);
 
   const handleSearch = async () => {
     setError('');
@@ -126,8 +172,10 @@ export default function Status() {
     setFilterUser('__all__');
     setFilterEmail('__all__');
     setFilterStatus('__all__');
+    setFilterServiceType('__all__');
     setFilterDateFrom('');
     setFilterDateTo('');
+    setSemanticSearch('');
     setQuery('');
     setResults([]);
     setError('');
@@ -360,136 +408,123 @@ export default function Status() {
           {/* Admin View */}
           {isAdmin && (
             <div className="space-y-6">
-              {/* Admin Filters */}
+              {/* Compact Admin Filters Bar */}
               <Card className="animate-fade-in">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Filter className="h-5 w-5" />
-                    Filters & Search
-                  </CardTitle>
-                  <CardDescription>
-                    Filter and search through all service requests
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="filterUser" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Customer
-                      </Label>
-                      <Select value={filterUser} onValueChange={setFilterUser}>
-                        <SelectTrigger id="filterUser">
-                          <SelectValue placeholder="All customers" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__all__">All customers</SelectItem>
-                          {uniqueUsers.map(user => (
-                            <SelectItem key={user} value={user}>{user}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="filterEmail" className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email
-                      </Label>
-                      <Select value={filterEmail} onValueChange={setFilterEmail}>
-                        <SelectTrigger id="filterEmail">
-                          <SelectValue placeholder="All emails" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__all__">All emails</SelectItem>
-                          {uniqueEmails.map(email => (
-                            <SelectItem key={email} value={email}>{email}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="filterStatus" className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        Status
-                      </Label>
-                      <Select value={filterStatus} onValueChange={setFilterStatus}>
-                        <SelectTrigger id="filterStatus">
-                          <SelectValue placeholder="All statuses" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__all__">All statuses</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="In Progress">In Progress</SelectItem>
-                          <SelectItem value="Completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="filterDateFrom" className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        From Date
-                      </Label>
+                <CardContent className="p-4">
+                  {/* Semantic Search */}
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="filterDateFrom"
-                        type="date"
-                        value={filterDateFrom}
-                        onChange={(e) => setFilterDateFrom(e.target.value)}
-                        className="h-10"
+                        value={semanticSearch}
+                        onChange={(e) => setSemanticSearch(e.target.value)}
+                        placeholder="Search anything: ticket ID, customer name, email, service type, status, date..."
+                        className="pl-10 h-10"
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="filterDateTo" className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        To Date
-                      </Label>
-                      <Input
-                        id="filterDateTo"
-                        type="date"
-                        value={filterDateTo}
-                        onChange={(e) => setFilterDateTo(e.target.value)}
-                        className="h-10"
-                      />
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button onClick={clearFilters} variant="outline" className="w-full h-10">
-                        Clear All
-                      </Button>
                     </div>
                   </div>
 
-                  {/* Manual Search for Admin */}
-                  <div className="pt-6 border-t border-border">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="flex-1 space-y-2">
-                        <Label htmlFor="adminQuery" className="flex items-center gap-2">
-                          <Search className="h-4 w-4" />
-                          Manual Search
-                        </Label>
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="adminQuery"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            placeholder="Ticket ID, email, or phone"
-                            className="pl-10 h-10"
-                          />
+                  {/* Filter Bar */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+                    </div>
+
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger className="w-[130px] h-8">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Status</SelectItem>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={filterServiceType} onValueChange={setFilterServiceType}>
+                      <SelectTrigger className="w-[150px] h-8">
+                        <SelectValue placeholder="Service Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Types</SelectItem>
+                        {uniqueServiceTypes.map(type => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={filterUser} onValueChange={setFilterUser}>
+                      <SelectTrigger className="w-[140px] h-8">
+                        <SelectValue placeholder="Customer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Customers</SelectItem>
+                        {uniqueUsers.map(user => (
+                          <SelectItem key={user} value={user}>{user}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={filterEmail} onValueChange={setFilterEmail}>
+                      <SelectTrigger className="w-[140px] h-8">
+                        <SelectValue placeholder="Email" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Emails</SelectItem>
+                        {uniqueEmails.map(email => (
+                          <SelectItem key={email} value={email}>{email}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={(e) => setFilterDateFrom(e.target.value)}
+                        className="w-[140px] h-8"
+                        placeholder="From Date"
+                      />
+                      <span className="text-xs text-muted-foreground">to</span>
+                      <Input
+                        type="date"
+                        value={filterDateTo}
+                        onChange={(e) => setFilterDateTo(e.target.value)}
+                        className="w-[140px] h-8"
+                        placeholder="To Date"
+                      />
+                    </div>
+
+                    <Button onClick={clearFilters} variant="outline" size="sm" className="h-8">
+                      Clear All
+                    </Button>
+                  </div>
+
+                  {/* Legacy Search (kept for backward compatibility) */}
+                  {query && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              value={query}
+                              onChange={(e) => setQuery(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                              placeholder="Legacy search: Ticket ID, email, or phone"
+                              className="pl-10 h-8"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-end">
-                        <Button onClick={handleSearch} className="w-full sm:w-auto h-10">
+                        <Button onClick={handleSearch} size="sm" className="h-8">
                           <Search className="h-4 w-4 mr-2" />
                           Search
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -503,22 +538,32 @@ export default function Status() {
               {/* Results Display */}
               <div className="space-y-4">
                 {query && results.length > 0 ? (
-                  // Show search results when admin has searched
+                  // Show legacy search results when admin has used the old search
                   <>
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold">Search Results</h2>
+                      <h2 className="text-xl font-semibold">Legacy Search Results</h2>
                       <Badge variant="secondary">{results.length} found</Badge>
                     </div>
                     {results.map(renderServiceRequest)}
                   </>
                 ) : (
-                  // Show filtered results when no search query
+                  // Show filtered/searched results (including semantic search)
                   <>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <h2 className="text-xl font-semibold">All Service Requests</h2>
-                      <Badge variant="secondary" className="w-fit">
-                        {filteredAdminRequests.length} {filteredAdminRequests.length === 1 ? 'request' : 'requests'}
-                      </Badge>
+                      <h2 className="text-xl font-semibold">
+                        {semanticSearch.trim() ? 'Search Results' : 'All Service Requests'}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="w-fit">
+                          {filteredAdminRequests.length} {filteredAdminRequests.length === 1 ? 'request' : 'requests'}
+                        </Badge>
+                        {(semanticSearch.trim() || filterStatus !== '__all__' || filterServiceType !== '__all__' || 
+                          filterUser !== '__all__' || filterEmail !== '__all__' || filterDateFrom || filterDateTo) && (
+                          <Badge variant="outline" className="text-xs">
+                            Filtered
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     {filteredAdminRequests.length > 0 ? (
                       filteredAdminRequests.map(renderServiceRequest)
@@ -528,7 +573,10 @@ export default function Status() {
                           <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
                           <h3 className="text-lg font-semibold mb-2">No requests found</h3>
                           <p className="text-sm text-muted-foreground">
-                            Try adjusting your filters or search criteria
+                            {semanticSearch.trim() ? 
+                              'No requests match your search criteria. Try different keywords.' :
+                              'Try adjusting your filters or search criteria'
+                            }
                           </p>
                         </CardContent>
                       </Card>
