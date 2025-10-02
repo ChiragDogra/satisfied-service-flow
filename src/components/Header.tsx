@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Menu, X, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,6 +88,10 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-sm p-0 flex flex-col">
+              <VisuallyHidden>
+                <SheetTitle>Navigation Menu</SheetTitle>
+                <SheetDescription>Access navigation links and user account options</SheetDescription>
+              </VisuallyHidden>
               <div className="flex items-center justify-between px-4 py-6 border-b border-border/20 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
                   <img className="h-8 w-auto" src={logo} alt="Satisfied Computers" />
