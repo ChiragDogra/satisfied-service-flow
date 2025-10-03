@@ -10,6 +10,7 @@ import { useAdmin } from '../../contexts/AdminContext';
 import { UserProfile } from '../../types/UserProfile';
 import { ServiceRequest } from '../../contexts/ServiceContext';
 import { exportUserServiceRequestsToCSV, downloadCSV } from '../../utils/exportUtils';
+import ClickableContact from '../ClickableContact';
 import { 
   Download, 
   Calendar,
@@ -21,7 +22,8 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -98,13 +100,26 @@ const UserDetailView: React.FC<UserDetailViewProps> = ({ user, isOpen, onClose }
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="px-4 sm:px-6 py-4 sm:py-6 border-b sticky top-0 bg-background z-10">
-          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <User className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="truncate">{user.name}</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm">
-            Comprehensive user profile and service request analytics
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="truncate">{user.name}</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">
+                Comprehensive user profile and service request analytics
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 rounded-full hover:bg-muted flex-shrink-0 ml-2"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
@@ -128,15 +143,17 @@ const UserDetailView: React.FC<UserDetailViewProps> = ({ user, isOpen, onClose }
                 <div className="space-y-1.5 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                   <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                   <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                    <p className="text-sm truncate">{user.email}</p>
+                    <ClickableContact type="email" value={user.email} iconSize={14} className="text-sm truncate" />
                   </div>
                 </div>
                 <div className="space-y-1.5 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                   <Label className="text-xs font-medium text-muted-foreground">Phone</Label>
                   <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                    <p className="text-sm truncate">{user.phone || 'Not provided'}</p>
+                    {user.phone ? (
+                      <ClickableContact type="phone" value={user.phone} iconSize={14} className="text-sm truncate" />
+                    ) : (
+                      <p className="text-sm truncate text-muted-foreground">Not provided</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-1.5 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors sm:col-span-2 lg:col-span-1">

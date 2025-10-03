@@ -9,10 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { useService, ServiceRequest } from '@/contexts/ServiceContext';
 import { useAuth } from '@/contexts/AuthContext';
 import EstimateEditor from '@/components/admin/EstimateEditor';
+import ClickableContact from '@/components/ClickableContact';
+import ClickableCustomerName from '@/components/ClickableCustomerName';
 import { Search, Filter, Calendar, User, Mail, Phone, MapPin, Clock, AlertCircle, Package, DollarSign, Calculator } from 'lucide-react';
 
 export default function Status() {
-  const { requests, getRequestsByContact, getRequestById, getRequestsByUserId, loading } = useService();
+  const { requests, getRequestsByContact, getRequestById, getRequestsByUserId, updateRequestStatus, loading } = useService();
   const { user, isAdmin } = useAuth();
   
   // For regular users - no search needed, show their requests automatically
@@ -189,6 +191,16 @@ export default function Status() {
     setIsEstimateEditorOpen(true);
   };
 
+  // Handle status update for admins
+  const handleStatusUpdate = async (requestId: string, newStatus: ServiceRequest['status']) => {
+    try {
+      await updateRequestStatus(requestId, newStatus);
+      // The UI will update automatically through the context
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
   // Helper to get status variant
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -214,7 +226,15 @@ export default function Status() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-foreground">{r.customerName}</span>
+                {isAdmin ? (
+                  <ClickableCustomerName 
+                    customerName={r.customerName} 
+                    email={r.email}
+                    className="font-medium"
+                  />
+                ) : (
+                  <span className="font-medium text-foreground">{r.customerName}</span>
+                )}
                 <span className="text-muted-foreground">•</span>
                 <span className="text-muted-foreground">{r.serviceType}</span>
               </div>
@@ -222,13 +242,11 @@ export default function Status() {
               {isAdmin && (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    <span>{r.email}</span>
+                    <ClickableContact type="email" value={r.email} />
                   </div>
                   <span className="hidden sm:inline">•</span>
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    <span>{r.phone}</span>
+                    <ClickableContact type="phone" value={r.phone} />
                   </div>
                 </div>
               )}
@@ -328,12 +346,28 @@ export default function Status() {
 
           {/* Status Badge & Admin Actions */}
           <div className="flex sm:flex-col items-start gap-2">
-            <Badge 
-              variant={getStatusVariant(r.status)}
-              className="text-xs font-semibold px-3 py-1 whitespace-nowrap"
-            >
-              {r.status}
-            </Badge>
+            {isAdmin ? (
+              <Select
+                value={r.status}
+                onValueChange={(value) => handleStatusUpdate(r.id, value as ServiceRequest['status'])}
+              >
+                <SelectTrigger className="w-[120px] h-8 text-xs font-semibold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge 
+                variant={getStatusVariant(r.status)}
+                className="text-xs font-semibold px-3 py-1 whitespace-nowrap"
+              >
+                {r.status}
+              </Badge>
+            )}
             {isAdmin && (
               <Button
                 variant="outline"

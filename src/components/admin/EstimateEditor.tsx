@@ -86,13 +86,26 @@ const EstimateEditor: React.FC<EstimateEditorProps> = ({ isOpen, onClose, reques
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calculator className="w-5 h-5" />
-            Update Service Details
-          </DialogTitle>
-          <DialogDescription>
-            Set estimates, completion time, and diagnosed issue for ticket {request.id}
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="flex items-center gap-2">
+                <Calculator className="w-5 h-5" />
+                Update Service Details
+              </DialogTitle>
+              <DialogDescription>
+                Set estimates, completion time, and diagnosed issue for ticket {request.id}
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 rounded-full hover:bg-muted flex-shrink-0 ml-2"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

@@ -13,6 +13,8 @@ import { useAdmin } from '../../contexts/AdminContext';
 import { ServiceRequest } from '../../contexts/ServiceContext';
 import { exportServiceRequestsToCSV, downloadCSV } from '../../utils/exportUtils';
 import EstimateEditor from './EstimateEditor';
+import ClickableContact from '../ClickableContact';
+import ClickableCustomerName from '../ClickableCustomerName';
 import { 
   Search, 
   Filter, 
@@ -227,8 +229,15 @@ const ServiceRequestsManager: React.FC = () => {
                       <TableCell className="font-mono text-sm">{request.id}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{request.customerName}</div>
-                          <div className="text-sm text-muted-foreground">{request.email}</div>
+                          <div className="font-medium">
+                            <ClickableCustomerName 
+                              customerName={request.customerName} 
+                              email={request.email}
+                            />
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            <ClickableContact type="email" value={request.email} showIcon={false} />
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>{request.serviceType}</TableCell>
@@ -260,20 +269,23 @@ const ServiceRequestsManager: React.FC = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                       <Label className="text-sm font-medium">Customer Name</Label>
-                                      <p className="text-sm">{selectedRequest.customerName}</p>
+                                      <div className="text-sm">
+                                        <ClickableCustomerName 
+                                          customerName={selectedRequest.customerName} 
+                                          email={selectedRequest.email}
+                                        />
+                                      </div>
                                     </div>
                                     <div>
                                       <Label className="text-sm font-medium">Email</Label>
                                       <div className="flex items-center gap-2">
-                                        <Mail className="w-4 h-4 text-muted-foreground" />
-                                        <p className="text-sm">{selectedRequest.email}</p>
+                                        <ClickableContact type="email" value={selectedRequest.email} />
                                       </div>
                                     </div>
                                     <div>
                                       <Label className="text-sm font-medium">Phone</Label>
                                       <div className="flex items-center gap-2">
-                                        <Phone className="w-4 h-4 text-muted-foreground" />
-                                        <p className="text-sm">{selectedRequest.phone}</p>
+                                        <ClickableContact type="phone" value={selectedRequest.phone} />
                                       </div>
                                     </div>
                                     <div>

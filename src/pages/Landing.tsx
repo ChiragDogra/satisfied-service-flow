@@ -1,24 +1,29 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import Header from '@/components/Header';
-import { useAuth } from '@/contexts/AuthContext';
-import {
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  ArrowRight, 
+  CheckCircle, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Clock, 
+  Star, 
+  Shield, 
+  Zap, 
+  Users,
+  MessageCircle,
   Monitor,
   Printer,
   Camera,
   Network,
   Settings,
-  CheckCircle,
-  Users,
-  Award,
-  Clock,
-  Phone,
-  Mail,
-  MapPin,
-  MessageCircle
-} from 'lucide-react';
+  Award
+} from "lucide-react";
+import Header from "@/components/Header";
+import ClickableContact from "@/components/ClickableContact";
+import { useAuth } from "@/contexts/AuthContext";
 
 const services = [
   {
@@ -182,7 +187,7 @@ export default function Landing() {
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Call Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">+91 9634409988</p>
+              <ClickableContact type="phone" value="+91 9634409988" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
               <p className="text-xs sm:text-sm text-muted-foreground">Mon-Fri: 8AM-6PM</p>
             </div>
 
@@ -191,7 +196,7 @@ export default function Landing() {
                 <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">WhatsApp</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">+91 9634409988</p>
+              <ClickableContact type="whatsapp" value="+91 9634409988" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
               <p className="text-xs sm:text-sm text-muted-foreground">Quick Support</p>
             </div>
             
@@ -200,7 +205,7 @@ export default function Landing() {
                 <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Email Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium break-all">satisfiedcomputers@gmail.com</p>
+              <ClickableContact type="email" value="satisfiedcomputers@gmail.com" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium break-all" />
               <p className="text-xs sm:text-sm text-muted-foreground">24hr response time</p>
             </div>
             
@@ -242,9 +247,9 @@ export default function Landing() {
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Info</h3>
               <div className="space-y-1.5 sm:space-y-2 text-background/70 text-sm sm:text-base">
-                <p>Phone: +91 9634409988</p>
-                <p>WhatsApp: +91 9634409988</p>
-                <p className="break-all">Email: satisfiedcomputers@gmail.com</p>
+                <p>Phone: <ClickableContact type="phone" value="+91 9634409988" showIcon={false} className="text-background/70 hover:text-background" /></p>
+                <p>WhatsApp: <ClickableContact type="whatsapp" value="+91 9634409988" showIcon={false} className="text-background/70 hover:text-background" /></p>
+                <p className="break-all">Email: <ClickableContact type="email" value="satisfiedcomputers@gmail.com" showIcon={false} className="text-background/70 hover:text-background break-all" /></p>
                 <p>Address: Transport Nagar, Saharanpur</p>
                 <p>Hours: Mon-Fri 8AM-6PM, Sat 9AM-4PM</p>
               </div>

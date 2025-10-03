@@ -129,24 +129,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const actionCodeSettings = {
-        url: `${window.location.origin}/reset-password`, // URL to redirect to after password reset
-        handleCodeInApp: true
-      };
-
       console.log('Sending password reset email to:', email);
-      console.log('Using redirect URL:', actionCodeSettings.url);
       
-      await sendPasswordResetEmail(auth, email, actionCodeSettings);
-      console.log('Password reset email sent successfully');
-      toast.success('Password reset email sent! Please check your inbox and spam folder.');
+      // For production, use Firebase's default password reset flow without custom continue URL
+      // This avoids the unauthorized-continue-uri error
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      if (isProduction) {
+        // Use Firebase's default password reset flow for production
+        await sendPasswordResetEmail(auth, email);
+        console.log('Password reset email sent successfully (production mode)');
+        toast.success('Password reset email sent! Check your inbox and follow the instructions.');
+      } else {
+        // For local development, use custom continue URL
+        const actionCodeSettings = {
+          url: `${window.location.origin}/reset-password`,
+          handleCodeInApp: true
+        };
+
+        console.log('Using redirect URL (development mode):', actionCodeSettings.url);
+        
+        await sendPasswordResetEmail(auth, email, actionCodeSettings);
+        console.log('Password reset email sent successfully (development mode)');
+        toast.success('Password reset email sent! Please check your inbox and spam folder.');
+      }
+      
       return true;
     } catch (error) {
       console.error('Password reset error:', error);
       const authError = error as AuthError;
       console.error('Error code:', authError.code);
       console.error('Error message:', authError.message);
-      toast.error(getAuthErrorMessage(authError.code));
+      
+      // Provide specific guidance for unauthorized domain error
+      if (authError.code === 'auth/unauthorized-continue-uri') {
+        console.error('Domain not allowlisted. Current origin:', window.location.origin);
+        toast.error('Using Firebase default password reset. Check your email for reset instructions.');
+        
+        // Try again without continue URL as fallback
+        try {
+          await sendPasswordResetEmail(auth, email);
+          toast.success('Password reset email sent! Check your inbox.');
+          return true;
+        } catch (fallbackError) {
+          console.error('Fallback password reset also failed:', fallbackError);
+          toast.error('Failed to send password reset email. Please try again later.');
+          return false;
+        }
+      } else {
+        toast.error(getAuthErrorMessage(authError.code));
+      }
       return false;
     }
   };
@@ -166,14 +198,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      // Configure continuation URL
-      const actionCodeSettings = {
-        url: `${window.location.origin}/dashboard`, // Redirect to dashboard after verification
-        handleCodeInApp: false // Use default Firebase email handling
-      };
+      // For production, use Firebase's default email verification flow
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      if (isProduction) {
+        // Use Firebase's default email verification for production
+        console.log('Attempting to send verification email to:', user.email);
+        await sendEmailVerification(user);
+      } else {
+        // For local development, use custom continue URL
+        const actionCodeSettings = {
+          url: `${window.location.origin}/dashboard`,
+          handleCodeInApp: false
+        };
 
-      console.log('Attempting to send verification email to:', user.email);
-      await sendEmailVerification(user, actionCodeSettings);
+        console.log('Attempting to send verification email to:', user.email);
+        await sendEmailVerification(user, actionCodeSettings);
+      }
       
       // Force refresh the user to get latest emailVerified status
       await user.reload();
@@ -197,6 +238,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast.error('Too many attempts. Please wait a few minutes before trying again.');
       } else if (authError.code === 'auth/internal-error') {
         toast.error('Server error. Please try again later.');
+      } else if (authError.code === 'auth/unauthorized-continue-uri') {
+        // Try again without continue URL as fallback
+        try {
+          await sendEmailVerification(user);
+          toast.success('Verification email sent! Please check your inbox.');
+          return true;
+        } catch (fallbackError) {
+          console.error('Fallback email verification also failed:', fallbackError);
+          toast.error('Failed to send verification email. Please try again later.');
+          return false;
+        }
       } else {
         toast.error(getAuthErrorMessage(authError.code));
       }

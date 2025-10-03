@@ -516,18 +516,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Sending password reset email to:', email);
       
-      // Get the current origin and ensure it's properly formatted
-      const currentOrigin = window.location.origin;
-      const continueUrl = `${currentOrigin}/login`;
+      // For production, use Firebase's default password reset flow without custom continue URL
+      // This avoids the unauthorized-continue-uri error
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
       
-      console.log('Using continue URL:', continueUrl);
+      if (isProduction) {
+        // Use Firebase's default password reset flow for production
+        await sendPasswordResetEmail(auth, email);
+        console.log('Password reset email sent successfully (production mode)');
+        toast.success('Password reset email sent! Check your inbox and follow the instructions.');
+      } else {
+        // For local development, use custom continue URL
+        const currentOrigin = window.location.origin;
+        const continueUrl = `${currentOrigin}/login`;
+        
+        console.log('Using continue URL (development mode):', continueUrl);
+        
+        await sendPasswordResetEmail(auth, email, {
+          handleCodeInApp: false,
+          url: continueUrl
+        });
+        console.log('Password reset email sent successfully (development mode)');
+        toast.success('Password reset email sent! Check your inbox.');
+      }
       
-      await sendPasswordResetEmail(auth, email, {
-        handleCodeInApp: false, // Set to true if you want to handle the reset in your app
-        url: continueUrl // Redirect URL after password reset
-      });
-      console.log('Password reset email sent successfully');
-      toast.success('Password reset email sent! Check your inbox.');
       return true;
     } catch (error: unknown) {
       console.error('Password reset error:', error);
@@ -538,7 +550,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Provide specific guidance for unauthorized domain error
       if (authError.code === 'auth/unauthorized-continue-uri') {
         console.error('Domain not allowlisted. Current origin:', window.location.origin);
-        toast.error('Domain not authorized. Please contact support or check Firebase configuration.');
+        toast.error('Using Firebase default password reset. Check your email for reset instructions.');
+        
+        // Try again without continue URL as fallback
+        try {
+          await sendPasswordResetEmail(auth, email);
+          toast.success('Password reset email sent! Check your inbox.');
+          return true;
+        } catch (fallbackError) {
+          console.error('Fallback password reset also failed:', fallbackError);
+          toast.error('Failed to send password reset email. Please try again later.');
+          return false;
+        }
       } else {
         toast.error(getAuthErrorMessage(authError.code));
       }

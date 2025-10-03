@@ -22,17 +22,17 @@ export const exportServiceRequestsToCSV = (requests: ServiceRequest[]): string =
   const csvContent = [
     headers.join(','),
     ...requests.map(request => [
-      request.id,
-      `"${request.customerName}"`,
-      request.email,
-      request.phone,
-      `"${request.address}"`,
-      request.serviceType,
-      `"${request.description.replace(/"/g, '""')}"`,
-      request.customService ? `"${request.customService}"` : '',
-      request.urgency,
-      request.preferredDate,
-      request.status,
+      request.id || '',
+      `"${(request.customerName || '').replace(/"/g, '""')}"`,
+      request.email || '',
+      request.phone || '',
+      `"${(request.address || '').replace(/"/g, '""')}"`,
+      request.serviceType || '',
+      `"${(request.description || '').replace(/"/g, '""')}"`,
+      request.customService ? `"${request.customService.replace(/"/g, '""')}"` : '',
+      request.urgency || '',
+      request.preferredDate || '',
+      request.status || '',
       formatDateForExport(request.createdAt),
       formatDateForExport(request.updatedAt)
     ].join(','))
@@ -59,11 +59,11 @@ export const exportUsersToCSV = (users: UserProfile[]): string => {
   const csvContent = [
     headers.join(','),
     ...users.map(user => [
-      user.uid,
-      `"${user.name}"`,
-      user.email,
+      user.uid || '',
+      `"${(user.name || '').replace(/"/g, '""')}"`,
+      user.email || '',
       user.phone || '',
-      user.address?.street ? `"${user.address.street}"` : '',
+      user.address?.street ? `"${user.address.street.replace(/"/g, '""')}"` : '',
       user.address?.city || '',
       user.address?.state || '',
       user.address?.zipCode || '',
@@ -97,22 +97,28 @@ const formatDateForExport = (timestamp: unknown): string => {
   try {
     // Handle Firestore timestamp
     if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-      return (timestamp as any).toDate().toISOString();
+      const date = (timestamp as any).toDate();
+      if (date && typeof date.toISOString === 'function') {
+        return date.toISOString();
+      }
     }
     
     // Handle string dates
-    if (typeof timestamp === 'string') {
-      return new Date(timestamp).toISOString();
+    if (typeof timestamp === 'string' && timestamp.trim() !== '') {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
     }
     
     // Handle Date objects
-    if (timestamp instanceof Date) {
+    if (timestamp instanceof Date && !isNaN(timestamp.getTime())) {
       return timestamp.toISOString();
     }
     
     return '';
   } catch (error) {
-    console.error('Error formatting date:', error);
+    console.error('Error formatting date:', error, 'Input:', timestamp);
     return '';
   }
 };
@@ -126,14 +132,20 @@ export const formatDateForDisplay = (timestamp: unknown): string => {
     
     // Handle Firestore timestamp
     if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-      date = (timestamp as any).toDate();
+      const firestoreDate = (timestamp as any).toDate();
+      if (firestoreDate && typeof firestoreDate.getTime === 'function') {
+        date = firestoreDate;
+      }
     }
     // Handle string dates
-    else if (typeof timestamp === 'string') {
-      date = new Date(timestamp);
+    else if (typeof timestamp === 'string' && timestamp.trim() !== '') {
+      const parsedDate = new Date(timestamp);
+      if (!isNaN(parsedDate.getTime())) {
+        date = parsedDate;
+      }
     }
     // Handle Date objects
-    else if (timestamp instanceof Date) {
+    else if (timestamp instanceof Date && !isNaN(timestamp.getTime())) {
       date = timestamp;
     }
     
@@ -143,7 +155,7 @@ export const formatDateForDisplay = (timestamp: unknown): string => {
     
     return 'Invalid Date';
   } catch (error) {
-    console.error('Error formatting date for display:', error);
+    console.error('Error formatting date for display:', error, 'Input:', timestamp);
     return 'Invalid Date';
   }
 };
@@ -174,20 +186,20 @@ export const exportUserServiceRequestsToCSV = (
   const csvContent = [
     headers.join(','),
     ...requests.map(request => [
-      `"${user.name}"`,
-      user.email,
+      `"${(user.name || '').replace(/"/g, '""')}"`,
+      user.email || '',
       user.phone || '',
-      user.uid,
-      request.id,
-      request.serviceType,
-      `"${request.description.replace(/"/g, '""')}"`,
-      request.customService ? `"${request.customService}"` : '',
-      request.urgency,
-      request.preferredDate,
-      request.status,
+      user.uid || '',
+      request.id || '',
+      request.serviceType || '',
+      `"${(request.description || '').replace(/"/g, '""')}"`,
+      request.customService ? `"${request.customService.replace(/"/g, '""')}"` : '',
+      request.urgency || '',
+      request.preferredDate || '',
+      request.status || '',
       formatDateForExport(request.createdAt),
       formatDateForExport(request.updatedAt),
-      `"${request.address}"`
+      `"${(request.address || '').replace(/"/g, '""')}"`
     ].join(','))
   ].join('\n');
 

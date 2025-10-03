@@ -11,6 +11,7 @@ import { UserProfile } from '../../types/UserProfile';
 import { ServiceRequest } from '../../contexts/ServiceContext';
 import { exportUsersToCSV, downloadCSV } from '../../utils/exportUtils';
 import UserDetailView from './UserDetailView';
+import ClickableContact from '../ClickableContact';
 import { 
   Search, 
   Download, 
@@ -219,13 +220,11 @@ const UserManager: React.FC = () => {
                         <TableCell>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm">
-                              <Mail className="w-3 h-3 text-muted-foreground" />
-                              {user.email}
+                              <ClickableContact type="email" value={user.email} iconSize={12} />
                             </div>
                             {user.phone && (
                               <div className="flex items-center gap-2 text-sm">
-                                <Phone className="w-3 h-3 text-muted-foreground" />
-                                {user.phone}
+                                <ClickableContact type="phone" value={user.phone} iconSize={12} />
                               </div>
                             )}
                           </div>

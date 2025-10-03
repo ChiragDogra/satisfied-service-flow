@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { User, Mail, Phone, MapPin, Save, X } from 'lucide-react';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Save, 
+  Loader2,
+  X
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProfileSettingsProps {
   isOpen: boolean;
@@ -59,7 +67,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
 
   const handleInputChange = (field: string, value: string) => {
     if (field.startsWith('address.')) {
-      const addressField = field.split('.')[1];
+      const fieldParts = field.split('.');
+      if (fieldParts.length < 2) {
+        console.error('Invalid address field format:', field);
+        return;
+      }
+      const addressField = fieldParts[1];
       setFormData(prev => ({
         ...prev,
         address: {
@@ -139,13 +152,26 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Profile Settings
-          </DialogTitle>
-          <DialogDescription>
-            Update your personal information and contact details
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Profile Settings
+              </DialogTitle>
+              <DialogDescription>
+                Update your personal information and contact details
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 rounded-full hover:bg-muted flex-shrink-0 ml-2"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
