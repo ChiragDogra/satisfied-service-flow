@@ -405,10 +405,10 @@ export default function Status() {
       <Header />
       <div className={`mx-auto px-4 sm:px-6 py-8 sm:py-12 ${isAdmin ? 'max-w-7xl' : 'max-w-4xl'}`}>
         <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+          <h1 className="text-3xl sm:text-5xl font-extrabold bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent mb-3 tracking-tight">
             {isAdmin ? 'Service Status Management' : 'Your Service Requests'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground/80">
             {isAdmin 
               ? 'Manage and track all customer service requests' 
               : 'Track the status of your service requests'}
