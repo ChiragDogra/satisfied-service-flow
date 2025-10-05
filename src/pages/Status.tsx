@@ -79,13 +79,12 @@ export default function Status() {
   // Filter admin requests based on selected filters and semantic search
   const filteredAdminRequests = useMemo(() => {
     let filtered = [...requests];
-
     // Apply semantic search first if provided
     if (semanticSearch.trim()) {
       const searchTerm = semanticSearch.toLowerCase().trim();
       filtered = filtered.filter(req => {
         // Search through all relevant fields
-        const searchableFields = [req.id, req.customerName, req.email, req.phone, req.serviceType, req.status, req.description, req.address, req.urgency, req.preferredDate].filter(Boolean).map(field => field.toString().toLowerCase());
+        const searchableFields = [req.ticketId || req.id, req.customerName, req.email, req.phone, req.serviceType, req.status, req.description, req.address, req.urgency, req.preferredDate].filter(Boolean).map(field => field?.toString().toLowerCase() || '');
 
         // Also search in formatted date
         let dateString = '';
@@ -234,7 +233,7 @@ export default function Status() {
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Ticket ID</span>
-                  <p className="font-mono font-bold text-lg text-foreground">{r.id}</p>
+                  <p className="font-mono font-bold text-lg text-foreground">{r.ticketId || r.id}</p>
                 </div>
               </div>
               

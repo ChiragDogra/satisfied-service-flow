@@ -332,7 +332,7 @@ const UserManager: React.FC = () => {
                                                 <div className="flex items-start justify-between mb-2">
                                                   <div>
                                                     <h4 className="font-medium">{request.serviceType}</h4>
-                                                    <p className="text-sm text-muted-foreground">Ticket: {request.id}</p>
+                                                    <p className="text-sm text-muted-foreground">Ticket: {request.ticketId || request.id}</p>
                                                   </div>
                                                   <div className="flex items-center gap-2">
                                                     <Badge variant={

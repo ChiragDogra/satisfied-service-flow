@@ -275,7 +275,7 @@ const UserDetailView: React.FC<UserDetailViewProps> = ({ user, isOpen, onClose }
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1 min-w-0 flex-1">
                             <p className="text-xs text-muted-foreground">Ticket ID</p>
-                            <p className="font-mono text-sm truncate">{request.id}</p>
+                            <p className="font-mono text-sm truncate">{request.ticketId || request.id}</p>
                           </div>
                           <Badge variant={
                             request.status === 'Completed' ? 'outline' :
@@ -334,7 +334,7 @@ const UserDetailView: React.FC<UserDetailViewProps> = ({ user, isOpen, onClose }
                       <TableBody>
                         {filteredRequests.map((request) => (
                           <TableRow key={request.id} className="hover:bg-muted/50">
-                            <TableCell className="font-mono text-xs">{request.id}</TableCell>
+                            <TableCell className="font-mono text-xs">{request.ticketId || request.id}</TableCell>
                             <TableCell className="font-medium text-sm">{request.serviceType}</TableCell>
                             <TableCell className="max-w-xs">
                               <div className="truncate text-sm" title={request.description}>

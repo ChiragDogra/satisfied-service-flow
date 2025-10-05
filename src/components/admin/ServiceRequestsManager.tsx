@@ -49,7 +49,7 @@ const ServiceRequestsManager: React.FC = () => {
       request.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.phone.includes(searchTerm) ||
-      request.id.toLowerCase().includes(searchTerm.toLowerCase());
+      (request.ticketId || request.id).toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
     const matchesServiceType = serviceTypeFilter === 'all' || request.serviceType === serviceTypeFilter;
@@ -226,7 +226,7 @@ const ServiceRequestsManager: React.FC = () => {
                 ) : (
                   filteredRequests.map((request) => (
                     <TableRow key={request.id}>
-                      <TableCell className="font-mono text-sm">{request.id}</TableCell>
+                      <TableCell className="font-mono text-sm">{request.ticketId || request.id}</TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">

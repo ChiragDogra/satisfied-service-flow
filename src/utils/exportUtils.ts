@@ -1,5 +1,7 @@
 import { ServiceRequest } from '../contexts/ServiceContext';
 import { UserProfile } from '../types/UserProfile';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
 
 // Function to export service requests to CSV format
 export const exportServiceRequestsToCSV = (requests: ServiceRequest[]): string => {
@@ -22,7 +24,7 @@ export const exportServiceRequestsToCSV = (requests: ServiceRequest[]): string =
   const csvContent = [
     headers.join(','),
     ...requests.map(request => [
-      request.id || '',
+      request.ticketId || request.id || '',
       `"${(request.customerName || '').replace(/"/g, '""')}"`,
       request.email || '',
       request.phone || '',
@@ -190,7 +192,7 @@ export const exportUserServiceRequestsToCSV = (
       user.email || '',
       user.phone || '',
       user.uid || '',
-      request.id || '',
+      request.ticketId || request.id || '',
       request.serviceType || '',
       `"${(request.description || '').replace(/"/g, '""')}"`,
       request.customService ? `"${request.customService.replace(/"/g, '""')}"` : '',
@@ -258,4 +260,56 @@ export const getServiceStatistics = (requests: ServiceRequest[]) => {
     serviceTypeStats,
     urgencyStats
   };
+};
+
+// Function to generate ticket ID in SC/DD/MM/YY/SR No. format
+export const generateTicketId = async (): Promise<string> => {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = String(now.getFullYear()).slice(-2);
+  
+  const datePrefix = `SC/${day}/${month}/${year}`;
+  
+  if (!db) {
+    // Fallback for when Firebase is not available
+    const randomSR = Math.floor(Math.random() * 1000) + 1;
+    return `${datePrefix}/${String(randomSR).padStart(3, '0')}`;
+  }
+
+  try {
+    // Query for existing tickets with today's date prefix to find the highest number
+    const q = query(
+      collection(db, 'serviceRequests'),
+      where('ticketId', '>=', datePrefix),
+      where('ticketId', '<', datePrefix + 'Z'), // This ensures we only get tickets with today's prefix
+      orderBy('ticketId', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    let maxNumber = 0;
+    
+    // Find the highest sequential number for today
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.ticketId && data.ticketId.startsWith(datePrefix)) {
+        const parts = data.ticketId.split('/');
+        if (parts.length === 5) {
+          const number = parseInt(parts[4], 10);
+          if (!isNaN(number) && number > maxNumber) {
+            maxNumber = number;
+          }
+        }
+      }
+    });
+    
+    // Generate next sequential number
+    const srNumber = maxNumber + 1;
+    return `${datePrefix}/${String(srNumber).padStart(3, '0')}`;
+  } catch (error) {
+    console.error('Error generating ticket ID:', error);
+    // Fallback to timestamp-based number if query fails
+    const timestampSR = now.getTime() % 1000;
+    return `${datePrefix}/${String(timestampSR).padStart(3, '0')}`;
+  }
 };

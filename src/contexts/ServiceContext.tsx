@@ -12,9 +12,11 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { generateTicketId } from '../utils/exportUtils';
 
 export interface ServiceRequest {
   id: string;
+  ticketId: string;
   userId?: string;
   customerName: string;
   email: string;
@@ -35,7 +37,7 @@ export interface ServiceRequest {
 
 interface ServiceContextType {
   requests: ServiceRequest[];
-  addRequest: (request: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
+  addRequest: (request: Omit<ServiceRequest, 'id' | 'ticketId' | 'status' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
   updateRequestEstimates: (id: string, estimates: { estimatedPrice?: number; estimatedCompletionTime?: string; diagnosedIssue?: string }) => Promise<void>;
   getRequestsByContact: (emailOrPhone: string) => Promise<ServiceRequest[]>;
@@ -50,6 +52,7 @@ const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 const mockRequests: ServiceRequest[] = [
   {
     id: 'SC-001',
+    ticketId: 'SC/05/10/24/001',
     customerName: 'John Smith',
     email: 'john.smith@email.com',
     phone: '+1-555-0123',
@@ -64,6 +67,7 @@ const mockRequests: ServiceRequest[] = [
   },
   {
     id: 'SC-002',
+    ticketId: 'SC/05/10/24/002',
     customerName: 'Sarah Johnson',
     email: 'sarah.j@business.com',
     phone: '+1-555-0456',
@@ -78,6 +82,7 @@ const mockRequests: ServiceRequest[] = [
   },
   {
     id: 'SC-003',
+    ticketId: 'SC/05/10/24/003',
     customerName: 'Mike Davis',
     email: 'mike.davis@home.net',
     phone: '+1-555-0789',
@@ -130,7 +135,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const addRequest = async (newRequest: Omit<ServiceRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
+  const addRequest = async (newRequest: Omit<ServiceRequest, 'id' | 'ticketId' | 'status' | 'createdAt' | 'updatedAt'>) => {
     if (!db) {
       throw new Error('Firebase not initialized');
     }
@@ -141,7 +146,11 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Missing required fields');
       }
 
+      // Generate ticket ID
+      const ticketId = await generateTicketId();
+
       const requestData = {
+        ticketId,
         userId: newRequest.userId || null,
         customerName: newRequest.customerName,
         email: newRequest.email,
@@ -159,8 +168,8 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Adding request to Firestore:', requestData);
       const docRef = await addDoc(collection(db, 'serviceRequests'), requestData);
-      console.log('Request added with ID:', docRef.id);
-      return docRef.id;
+      console.log('Request added with ID:', docRef.id, 'Ticket ID:', ticketId);
+      return ticketId; // Return the custom ticket ID instead of document ID
     } catch (error) {
       console.error('Error adding service request:', error);
       throw error;
@@ -253,18 +262,27 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getRequestById = async (id: string) => {
-    // First try to find in current requests
-    const found = requests.find(req => req.id === id);
+    // First try to find in current requests by document ID or ticket ID
+    const found = requests.find(req => req.id === id || req.ticketId === id);
     if (found) return found;
     
     // If not found in memory, try to fetch from Firestore
     if (!db) return undefined;
     
     try {
-      const docRef = doc(db, 'serviceRequests', id);
-      const docSnap = await getDocs(query(collection(db, 'serviceRequests'), where('__name__', '==', id)));
+      // Try to find by document ID first
+      const docRefQuery = query(collection(db, 'serviceRequests'), where('__name__', '==', id));
+      const docSnap = await getDocs(docRefQuery);
       if (!docSnap.empty) {
         const doc = docSnap.docs[0];
+        return { id: doc.id, ...doc.data() } as ServiceRequest;
+      }
+      
+      // If not found by document ID, try to find by ticket ID
+      const ticketQuery = query(collection(db, 'serviceRequests'), where('ticketId', '==', id));
+      const ticketSnap = await getDocs(ticketQuery);
+      if (!ticketSnap.empty) {
+        const doc = ticketSnap.docs[0];
         return { id: doc.id, ...doc.data() } as ServiceRequest;
       }
     } catch (error) {

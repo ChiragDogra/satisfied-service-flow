@@ -93,7 +93,7 @@ const EstimateEditor: React.FC<EstimateEditorProps> = ({ isOpen, onClose, reques
                 Update Service Details
               </DialogTitle>
               <DialogDescription>
-                Set estimates, completion time, and diagnosed issue for ticket {request.id}
+                Set estimates, completion time, and diagnosed issue for ticket {request.ticketId || request.id}
               </DialogDescription>
             </div>
             <Button
