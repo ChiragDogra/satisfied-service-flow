@@ -218,6 +218,47 @@ export default function Landing() {
               <p className="text-xs sm:text-sm text-muted-foreground">Saharanpur</p>
             </div>
           </div>
+          
+          {/* Google Maps Embed */}
+          <div className="mt-8 sm:mt-12 lg:mt-16">
+            <div className="mx-auto max-w-4xl">
+              <div className="text-center mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Find Us</h3>
+                <p className="text-muted-foreground text-sm sm:text-base">Visit our location for in-person service and support</p>
+              </div>
+              <div className="relative overflow-hidden rounded-lg shadow-lg border border-border/50">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3462.8!2d77.585625!3d29.9743692!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390eebf6e7e6ab89%3A0xc72d6a6129acfacf!2sSatisfied%20computer!5e0!3m2!1sen!2sin!4v1696512345678!5m2!1sen!2sin"
+                  width="100%"
+                  height="300"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full h-[300px] sm:h-[350px] lg:h-[400px]"
+                  title="Satisfied Computers Location - Transport Nagar, Saharanpur"
+                />
+              </div>
+              <div className="text-center mt-4">
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs sm:text-sm px-3 py-2 h-8 sm:h-9"
+                >
+                  <a 
+                    href="https://maps.app.goo.gl/ynAf6JfJU6QiA41k9" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2"
+                  >
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                    Open in Maps
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
