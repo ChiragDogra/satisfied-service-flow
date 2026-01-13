@@ -6,10 +6,11 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Users, BarChart3, FileText, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Users, BarChart3, FileText, TrendingUp, Clock, CheckCircle, AlertCircle, Home } from 'lucide-react';
 import EmailVerification from '@/components/EmailVerification';
 import ServiceRequestsManager from '../components/admin/ServiceRequestsManager';
 import UserManager from '../components/admin/UserManager';
+import HomePageSettings from '../components/admin/HomePageSettings';
 import { getServiceStatistics } from '../utils/exportUtils';
 import Header from '../components/Header';
 
@@ -131,6 +132,9 @@ const AdminDashboard: React.FC = () => {
                 <TabsTrigger value="analytics" className="flex-1 sm:flex-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3">
                   Analytics
                 </TabsTrigger>
+                <TabsTrigger value="homepage" className="flex-1 sm:flex-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3">
+                  Home Page
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -168,6 +172,14 @@ const AdminDashboard: React.FC = () => {
                     >
                       <TrendingUp className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">View Analytics</span>
+                    </Button>
+                    <Button 
+                      className="w-full justify-start h-11" 
+                      variant="outline"
+                      onClick={() => setActiveTab('homepage')}
+                    >
+                      <Home className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">Edit Home Page</span>
                     </Button>
                   </CardContent>
                 </Card>
@@ -289,7 +301,6 @@ const AdminDashboard: React.FC = () => {
             <TabsContent value="requests" className="animate-fade-in">
               <ServiceRequestsManager />
             </TabsContent>
-
             <TabsContent value="users" className="animate-fade-in">
               <UserManager />
             </TabsContent>
@@ -337,11 +348,16 @@ const AdminDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="homepage" className="space-y-4 sm:space-y-6 animate-fade-in">
+              <HomePageSettings />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
     </div>
   );
+
 };
 
 export default AdminDashboard;

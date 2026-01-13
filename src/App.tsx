@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ServiceProvider } from "./contexts/ServiceContext";
 import { AdminProvider } from "./contexts/AdminContext";
+import { ContentProvider } from "./contexts/ContentContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FirebaseSetup from "./components/FirebaseSetup";
 import MobileNav from "./components/MobileNav";
@@ -42,7 +43,8 @@ const App = () => {
       <AuthProvider>
         <ServiceProvider>
           <AdminProvider>
-            <TooltipProvider>
+            <ContentProvider>
+              <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -83,7 +85,8 @@ const App = () => {
             </Routes>
             <MobileNav />
           </BrowserRouter>
-            </TooltipProvider>
+              </TooltipProvider>
+            </ContentProvider>
           </AdminProvider>
         </ServiceProvider>
       </AuthProvider>

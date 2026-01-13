@@ -24,6 +24,7 @@ import {
 import Header from "@/components/Header";
 import ClickableContact from "@/components/ClickableContact";
 import { useAuth } from "@/contexts/AuthContext";
+import { useContent } from "@/contexts/ContentContext";
 
 const services = [
   {
@@ -58,15 +59,29 @@ const services = [
   }
 ];
 
-const trustIndicators = [
-  { icon: Users, value: '500+', label: 'Satisfied Customers' },
-  { icon: Award, value: '15+', label: 'Years Experience' },
-  { icon: CheckCircle, value: '98%', label: 'Success Rate' },
-  { icon: Clock, value: '24/7', label: 'Support Available' }
-];
+// Trust indicators will be dynamic from content
 
 export default function Landing() {
   const { user, isAdmin } = useAuth();
+  const { content, loading } = useContent();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const trustIndicators = [
+    { icon: Users, value: content.trustIndicators.customers, label: 'Satisfied Customers' },
+    { icon: Award, value: content.trustIndicators.experience, label: 'Years Experience' },
+    { icon: CheckCircle, value: content.trustIndicators.successRate, label: 'Success Rate' },
+    { icon: Clock, value: content.trustIndicators.support, label: 'Support Available' }
+  ];
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <Header />
@@ -78,11 +93,10 @@ export default function Landing() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-primary-foreground leading-tight">
-              Professional IT Services You Can Trust
+              {content.hero.title}
             </h1>
             <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl leading-relaxed text-primary-foreground/90 px-2 sm:px-0">
-              Expert computer repair, networking solutions, and IT support for homes and businesses. 
-              Fast, reliable, and professional service with 15+ years of experience.
+              {content.hero.subtitle}
             </p>
             <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-0">
               {user ? (
@@ -130,11 +144,10 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
-              Complete IT Solutions
+              {content.services.title}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed px-4 sm:px-0">
-              From computer repair to network setup, we provide comprehensive IT services 
-              for homes and businesses across all major brands and systems.
+              {content.services.subtitle}
             </p>
           </div>
           
@@ -174,10 +187,10 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-6 sm:mb-8 lg:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
-              Ready to Get Started?
+              {content.contact.title}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed px-4 sm:px-0">
-              Contact us today for fast, professional IT service. We're here to help!
+              {content.contact.subtitle}
             </p>
           </div>
           
@@ -187,7 +200,7 @@ export default function Landing() {
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Call Us</h3>
-              <ClickableContact type="phone" value="+91 9634409988" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
+              <ClickableContact type="phone" value={content.contact.phone} showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
               <p className="text-xs sm:text-sm text-muted-foreground">Mon-Fri: 8AM-6PM</p>
             </div>
 
@@ -196,7 +209,7 @@ export default function Landing() {
                 <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">WhatsApp</h3>
-              <ClickableContact type="whatsapp" value="+91 9634409988" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
+              <ClickableContact type="whatsapp" value={content.contact.whatsapp} showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium" />
               <p className="text-xs sm:text-sm text-muted-foreground">Quick Support</p>
             </div>
             
@@ -205,7 +218,7 @@ export default function Landing() {
                 <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Email Us</h3>
-              <ClickableContact type="email" value="satisfiedcomputers@gmail.com" showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium break-all" />
+              <ClickableContact type="email" value={content.contact.email} showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium break-all" />
               <p className="text-xs sm:text-sm text-muted-foreground">24hr response time</p>
             </div>
             
@@ -214,8 +227,8 @@ export default function Landing() {
                 <MapPin className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Visit Us</h3>
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">Transport Nagar</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Saharanpur</p>
+              <p className="text-muted-foreground text-sm sm:text-base font-medium">{content.contact.address.line1}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{content.contact.address.line2}</p>
             </div>
           </div>
           
@@ -269,8 +282,7 @@ export default function Landing() {
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Satisfied Computers</h3>
               <p className="text-background/70 mb-4 text-sm sm:text-base leading-relaxed">
-                Professional IT services and computer repair with over 15 years of experience. 
-                Your satisfaction is our priority.
+                {content.footer.description}
               </p>
             </div>
             
@@ -288,11 +300,11 @@ export default function Landing() {
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Info</h3>
               <div className="space-y-1.5 sm:space-y-2 text-background/70 text-sm sm:text-base">
-                <p>Phone: <ClickableContact type="phone" value="+91 9634409988" showIcon={false} className="text-background/70 hover:text-background" /></p>
-                <p>WhatsApp: <ClickableContact type="whatsapp" value="+91 9634409988" showIcon={false} className="text-background/70 hover:text-background" /></p>
-                <p className="break-all">Email: <ClickableContact type="email" value="satisfiedcomputers@gmail.com" showIcon={false} className="text-background/70 hover:text-background break-all" /></p>
-                <p>Address: Transport Nagar, Saharanpur</p>
-                <p>Hours: Mon-Fri 8AM-6PM, Sat 9AM-4PM</p>
+                <p>Phone: <ClickableContact type="phone" value={content.contact.phone} showIcon={false} className="text-background/70 hover:text-background" /></p>
+                <p>WhatsApp: <ClickableContact type="whatsapp" value={content.contact.whatsapp} showIcon={false} className="text-background/70 hover:text-background" /></p>
+                <p className="break-all">Email: <ClickableContact type="email" value={content.contact.email} showIcon={false} className="text-background/70 hover:text-background break-all" /></p>
+                <p>Address: {content.contact.address.line1}, {content.contact.address.line2}</p>
+                <p>Hours: {content.contact.hours.weekdays}, {content.contact.hours.saturday}</p>
               </div>
             </div>
           </div>
