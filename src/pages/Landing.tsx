@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowRight, 
-  CheckCircle, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Star, 
+import {
+  ArrowRight,
+  CheckCircle,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Star,
   Users,
   MessageCircle,
   Monitor,
@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import ClickableContact from "@/components/ClickableContact";
+import { CarouselSection } from "@/components/CarouselSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useContent } from "@/contexts/ContentContext";
 
@@ -83,22 +84,22 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0 overflow-hidden">
       <Header />
-      
+
       {/* Hero Section - Enhanced with decorative elements */}
       <section className="relative overflow-hidden bg-gradient-hero py-12 sm:py-16 lg:py-20 xl:py-24 animate-gradient">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20" />
-        
+
         {/* Decorative Blobs */}
         <div className="absolute top-10 left-10 w-64 h-64 blob opacity-50 animate-float hidden lg:block" />
         <div className="absolute bottom-10 right-10 w-96 h-96 blob opacity-30 animate-float-delayed hidden lg:block" />
-        
+
         {/* Particles */}
-        <div className="absolute top-1/4 left-1/4 particle" style={{animationDelay: '0s'}} />
-        <div className="absolute top-1/3 right-1/3 particle" style={{animationDelay: '2s'}} />
-        <div className="absolute bottom-1/4 left-1/2 particle" style={{animationDelay: '4s'}} />
-        <div className="absolute top-2/3 right-1/4 particle" style={{animationDelay: '6s'}} />
-        
+        <div className="absolute top-1/4 left-1/4 particle" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-1/3 right-1/3 particle" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 left-1/2 particle" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-2/3 right-1/4 particle" style={{ animationDelay: '6s' }} />
+
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             {/* Enhanced Title with Gradient Text */}
@@ -106,22 +107,22 @@ export default function Landing() {
               <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" />
               <span className="text-sm font-medium text-white">Professional IT Services</span>
             </div>
-            
+
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight gradient-text-hero leading-tight mb-4">
               {content.hero.title}
             </h1>
-            
+
             <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl leading-relaxed text-primary-foreground/90 px-2 sm:px-0">
               {content.hero.subtitle}
             </p>
-            
+
             {/* Enhanced CTA Buttons */}
             <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-0">
               {user ? (
-                <Button 
-                  asChild 
-                  size="xl" 
-                  variant="secondary" 
+                <Button
+                  asChild
+                  size="xl"
+                  variant="secondary"
                   className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold hover-glow group"
                 >
                   <Link to={isAdmin ? '/admin/dashboard' : '/customer/dashboard'}>
@@ -131,10 +132,10 @@ export default function Landing() {
                 </Button>
               ) : (
                 <>
-                  <Button 
-                    asChild 
-                    size="xl" 
-                    variant="secondary" 
+                  <Button
+                    asChild
+                    size="xl"
+                    variant="secondary"
                     className="shadow-xl w-full sm:w-auto min-h-[48px] text-base font-semibold hover-glow animate-pulse-glow group"
                   >
                     <Link to="/register">
@@ -142,16 +143,21 @@ export default function Landing() {
                       <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </Button>
-                  <Button 
-                    asChild 
-                    variant="outline" 
-                    size="xl" 
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="xl"
                     className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary w-full sm:w-auto min-h-[48px] text-base font-semibold hover-scale backdrop-blur-sm"
                   >
                     <Link to="/login">Sign In</Link>
                   </Button>
                 </>
               )}
+            </div>
+
+            {/* Carousel Section */}
+            <div className="animate-float-delayed mt-12 w-full max-w-5xl mx-auto">
+              <CarouselSection />
             </div>
           </div>
         </div>
@@ -162,10 +168,10 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8 lg:grid-cols-4">
             {trustIndicators.map((item, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="text-center p-4 sm:p-6 glass-card rounded-2xl hover-glow hover-scale transition-all"
-                style={{animationDelay: `${index * 0.1}s`}}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 items-center justify-center rounded-xl bg-gradient-primary animate-pulse-glow">
                   <item.icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
@@ -184,7 +190,7 @@ export default function Landing() {
       <section className="py-12 sm:py-16 lg:py-20 xl:py-24 relative">
         {/* Background Decoration */}
         <div className="absolute top-20 right-0 w-72 h-72 blob opacity-20 animate-float hidden xl:block" />
-        
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-8 sm:mb-12 lg:mb-16">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight gradient-text">
@@ -194,34 +200,34 @@ export default function Landing() {
               {content.services.subtitle}
             </p>
           </div>
-          
+
           <div className="mt-8 sm:mt-12 lg:mt-16 grid grid-cols-1 gap-6 sm:gap-8 lg:gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((service, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="group tilt-3d hover-glow gradient-border overflow-hidden h-full bg-gradient-card transition-all duration-300"
-                style={{animationDelay: `${index * 0.15}s`}}
+                style={{ animationDelay: `${index * 0.15}s` }}
               >
                 <CardContent className="p-6 sm:p-8 h-full flex flex-col relative">
                   {/* Decorative corner accent */}
                   <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-primary opacity-10 rounded-bl-full" />
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4">
                     <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg flex-shrink-0">
                       <service.icon className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
                     </div>
                     <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{service.title}</h3>
                   </div>
-                  
+
                   <p className="text-sm sm:text-base text-muted-foreground mb-5 leading-relaxed flex-grow">
                     {service.description}
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     {service.features.map((feature, featureIndex) => (
-                      <Badge 
-                        key={featureIndex} 
-                        variant="secondary" 
+                      <Badge
+                        key={featureIndex}
+                        variant="secondary"
                         className="text-xs px-3 py-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
                       >
                         <CheckCircle className="h-3 w-3 mr-1" />
@@ -233,12 +239,12 @@ export default function Landing() {
               </Card>
             ))}
           </div>
-          
+
           <div className="mt-8 sm:mt-12 lg:mt-16 text-center">
-            <Button 
-              asChild 
-              size="lg" 
-              variant="hero" 
+            <Button
+              asChild
+              size="lg"
+              variant="hero"
               className="shadow-xl min-h-[52px] w-full sm:w-auto text-base font-semibold max-w-xs hover-glow group px-8"
             >
               <Link to="/register">
@@ -248,13 +254,13 @@ export default function Landing() {
             </Button>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Contact Section - Enhanced */}
-      <section className="bg-muted/50 py-10 sm:py-12 lg:py-16 relative overflow-hidden">
+      < section className="bg-muted/50 py-10 sm:py-12 lg:py-16 relative overflow-hidden" >
         {/* Background Decoration */}
-        <div className="absolute bottom-0 left-0 w-96 h-96 blob opacity-10 animate-float-delayed" />
-        
+        < div className="absolute bottom-0 left-0 w-96 h-96 blob opacity-10 animate-float-delayed" />
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="mx-auto max-w-2xl text-center mb-8 sm:mb-10 lg:mb-14">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight gradient-text">
@@ -264,7 +270,7 @@ export default function Landing() {
               {content.contact.subtitle}
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-10">
             <div className="text-center p-5 sm:p-6 glass-card rounded-2xl hover-scale hover-glow transition-all">
               <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl bg-gradient-primary mb-4 animate-pulse-glow">
@@ -283,7 +289,7 @@ export default function Landing() {
               <ClickableContact type="whatsapp" value={content.contact.whatsapp} showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium hover:text-green-600 transition-colors" />
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">Quick Support</p>
             </div>
-            
+
             <div className="text-center p-5 sm:p-6 glass-card rounded-2xl hover-scale hover-glow transition-all">
               <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl bg-gradient-primary mb-4 animate-pulse-glow">
                 <Mail className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
@@ -292,7 +298,7 @@ export default function Landing() {
               <ClickableContact type="email" value={content.contact.email} showIcon={false} className="text-muted-foreground text-sm sm:text-base font-medium break-all hover:text-primary transition-colors" />
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">24hr response time</p>
             </div>
-            
+
             <div className="text-center p-5 sm:p-6 glass-card rounded-2xl hover-scale hover-glow transition-all">
               <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl bg-gradient-primary mb-4 animate-pulse-glow">
                 <MapPin className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
@@ -302,7 +308,7 @@ export default function Landing() {
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">{content.contact.address.line2}</p>
             </div>
           </div>
-          
+
           {/* Google Maps Embed - Enhanced */}
           <div className="mt-8 sm:mt-12 lg:mt-16">
             <div className="mx-auto max-w-4xl">
@@ -324,15 +330,15 @@ export default function Landing() {
                 />
               </div>
               <div className="text-center mt-6">
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
                   className="text-xs sm:text-sm px-4 py-2 h-9 sm:h-10 hover-scale glass-card"
                 >
-                  <a 
-                    href="https://maps.app.goo.gl/ynAf6JfJU6QiA41k9" 
-                    target="_blank" 
+                  <a
+                    href="https://maps.app.goo.gl/ynAf6JfJU6QiA41k9"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2"
                   >
@@ -345,14 +351,14 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Footer - Enhanced */}
-      <footer className="bg-foreground text-background py-8 sm:py-10 lg:py-12 relative overflow-hidden">
+      < footer className="bg-foreground text-background py-8 sm:py-10 lg:py-12 relative overflow-hidden" >
         {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+        < div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-        
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <div>
@@ -364,7 +370,7 @@ export default function Landing() {
                 {content.footer.description}
               </p>
             </div>
-            
+
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2 text-background/70 text-sm sm:text-base">
@@ -375,7 +381,7 @@ export default function Landing() {
                 <li className="hover:text-background transition-colors cursor-pointer">• IT Consulting</li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-4">Contact Info</h3>
               <div className="space-y-2 text-background/70 text-sm sm:text-base">
@@ -402,14 +408,14 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-8 pt-8 border-t border-background/20 text-center">
             <p className="text-background/70 text-sm sm:text-base">
               © {new Date().getFullYear()} Satisfied Computers. Professional IT Services.
             </p>
           </div>
         </div>
-      </footer>
-    </div>
+      </footer >
+    </div >
   );
 }
