@@ -73,11 +73,11 @@ export function CarouselSection() {
                                                 alt={image.alt}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 sm:p-10 text-left">
-                                                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 transform transition-all duration-500 translate-y-0 opacity-100 drop-shadow-md">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 text-left">
+                                                <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 lg:mb-3 transform transition-all duration-500 translate-y-0 opacity-100 drop-shadow-md leading-tight">
                                                     {image.title}
                                                 </h3>
-                                                <p className="text-base sm:text-lg lg:text-xl text-white/95 max-w-xl transform transition-all duration-500 translate-y-0 opacity-100 drop-shadow-sm leading-relaxed">
+                                                <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/95 max-w-xl transform transition-all duration-500 translate-y-0 opacity-100 drop-shadow-sm leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-3">
                                                     {image.subtitle}
                                                 </p>
                                             </div>
